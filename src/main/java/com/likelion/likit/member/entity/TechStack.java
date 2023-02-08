@@ -1,40 +1,32 @@
 package com.likelion.likit.member.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
-public enum TechStack {
-    JAVA("JAVA"),
-    PYTHON("PYTHON"),
-    C("C"),
-    CPP("CPP"),
-    SQL("SQL"),
-    MYSQL("MYSQL"),
-    HTML("HTML"),
-    CSS("CSS"),
-    REACT("REACT"),
-    JAVASCRIPT("JAVASCRIPT"),
-    DOCKER("DOCKER"),
-    AWS("AWS"),
-    CSHARP("CSHARP"),
-    DJANGO("DJANGO"),
-    SPRING("SPRING"),
-    SPRINGBOOT("SPRINGBOOT"),
-    VUE("VUE"),
-    GO("GO"),
-    FLASK("FLASK"),
-    SVELTE("SVELTE"),
-    NEXTJS("NEXTJS"),
-    TYPESCRIPT("TYPESCRIPT"),
-    FIGMA("FIGMA"),
-    GIT("GIT"),
-    SWIFT("SWIFT"),
-    KOTLIN("KOTLIN"),
-    KUBERNETES("KUBERNETES");
-    private String teckStack;
+@Entity
+@NoArgsConstructor
+public class TechStack {
 
-    TechStack(String teckStack) {
-        this.teckStack = teckStack;
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String techStack;
+    @OneToMany(mappedBy = "techstack")
+    private List<MemberDetail> memberDetails = new ArrayList<>();
+
+    public TechStack(String techStack) {
+        this.techStack = techStack;
     }
 
+    public void addMemberDetail(MemberDetail memberDetail) {
+        this.memberDetails.add(memberDetail);
+    }
 }
+

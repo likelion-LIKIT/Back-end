@@ -36,6 +36,7 @@ public class MemberController{
         tokenService.join(token);
     }
 
+    @Operation(summary = "로그인", description = "성공하면 Token 반환")
     @PostMapping("/member/login")
     public ResponseEntity<TokenDto> login(@RequestBody LoginReqDto loginReqDto) {
         Member member = memberService.findByStudentId(loginReqDto.getStudentId());
@@ -46,17 +47,26 @@ public class MemberController{
         }
     }
 
+    @Operation(summary = "회원정보 조회", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
     @GetMapping("/member")
     public ResponseEntity<MemberResDto> viewUserInfo(@RequestHeader String accessToken) {
         Member member = findMemberByToken(accessToken);
         return ResponseEntity.ok(new MemberResDto(member));
     }
 
+    @Operation(summary = "회원 정보 수정", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
     @PatchMapping("/member")
     public ResponseEntity<MemberResDto> updateUserInfo(@RequestHeader String accessToken,
                                                        @RequestBody MeberUpdateReqDto meberUpdateReqDto) {
         Member member = findMemberByToken(accessToken);
         return ResponseEntity.ok(memberService.update(member, meberUpdateReqDto));
+    }
+
+    @Operation(summary = "회원 정보 삭제", description = "Header에 accessToken 필수!")
+    @DeleteMapping("/member")
+    public void deleteUserInfo(@RequestHeader String accessToken) {
+        Member member = findMemberByToken(accessToken);
+        memberService.delete(member);
     }
 
     private Member findMemberByToken(String accessToken) {

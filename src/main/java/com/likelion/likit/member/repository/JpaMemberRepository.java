@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface JpaMemberRepository extends JpaRepository<Member,Long> {
 
     Optional<Member> findByStudentId(String studentId);
+    Long deleteByMember(Member member);
 }

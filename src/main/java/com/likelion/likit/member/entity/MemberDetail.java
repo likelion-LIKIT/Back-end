@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -40,8 +42,8 @@ public class MemberDetail {
     @Enumerated(value = EnumType.STRING)
     private Track track;
 
-    @Enumerated(value = EnumType.STRING)
-    private TechStack techStack;
+    @OneToMany(mappedBy = "memberdetail", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    private List<MemberTechStack> memberTechStacks = new ArrayList<>();
 
     @Column(name = "likelion_email", unique = true)
     private String likelionEmail;
@@ -57,7 +59,7 @@ public class MemberDetail {
 
     @Builder
     public MemberDetail(Member member, String studentName, String phoneNumber, String description,
-                        Grade grade, Major major, Track track, TechStack techStack, String likelionEmail,
+                        Grade grade, Major major, Track track, List<MemberTechStack> memberTechStacks, String likelionEmail,
                         String email, Integer term, Position position, String birth, String github) {
         this.member = member;
         this.studentName = studentName;
@@ -66,7 +68,7 @@ public class MemberDetail {
         this.grade = grade;
         this.major = major;
         this.track = track;
-        this.techStack = techStack;
+        this.memberTechStacks = memberTechStacks;
         this.likelionEmail = likelionEmail;
         this.email = email;
         this.term = term;
@@ -74,5 +76,9 @@ public class MemberDetail {
         this.birth = birth;
         this.github = github;
         this.updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+    }
+
+    public void addTechStack(MemberTechStack memberTechStack) {
+        this.memberTechStacks.add(memberTechStack);
     }
 }

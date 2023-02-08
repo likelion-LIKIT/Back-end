@@ -62,6 +62,10 @@ public interface JpaMemberDetailRepository extends JpaRepository<MemberDetail,Lo
     void updateGithub(Optional<String> updateGithub, Long memberId);
 
 
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE MemberDetail c SET c.updateDate = :updateDate WHERE c.memberId = :memberId ")
+    void updateUpdateDate(String updateUpdateDate, Long memberId);
+
 
 
 }
