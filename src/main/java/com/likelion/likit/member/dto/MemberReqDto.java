@@ -31,8 +31,9 @@ public class MemberReqDto {
                 .build();
     }
 
-    public MemberDetail detailEntity(){
+    public MemberDetail detailEntity(Member member){
         return MemberDetail.builder()
+                .member(member)
                 .studentName(studentName)
                 .phoneNumber(phoneNumber)
                 .grade(grade)

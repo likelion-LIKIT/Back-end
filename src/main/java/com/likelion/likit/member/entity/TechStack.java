@@ -1,5 +1,7 @@
 package com.likelion.likit.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
@@ -18,15 +20,17 @@ public class TechStack {
     @GeneratedValue
     private Long id;
     private String techStack;
-    @OneToMany(mappedBy = "techstack")
-    private List<MemberDetail> memberDetails = new ArrayList<>();
 
+    @OneToMany(mappedBy = "techStack") @JsonIgnore
+    private List<MemberTechStack> memberTechStacks = new ArrayList<>();
+
+    @Builder
     public TechStack(String techStack) {
         this.techStack = techStack;
     }
 
-    public void addMemberDetail(MemberDetail memberDetail) {
-        this.memberDetails.add(memberDetail);
+    public void addMemberDetail(MemberTechStack memberTechStack) {
+        this.memberTechStacks.add(memberTechStack);
     }
 }
 

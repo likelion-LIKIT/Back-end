@@ -5,66 +5,66 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+
+import java.util.List;
 import java.util.Optional;
 
 public interface JpaMemberDetailRepository extends JpaRepository<MemberDetail,Long> {
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.studentName = :studentName WHERE c.memberId = :memberId ")
-    void updateStudentName(Optional<String> updateStudentName, Long memberId);
+    Optional<MemberDetail> findByMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.phoneNumber = :phoneNumber WHERE c.memberId = :memberId ")
-    void updatePhoneNumber(Optional<String> updatePhoneNumber, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.studentName = :studentName WHERE c.id = :id ")
+    void updateStudentName(String studentName, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.description = :description WHERE c.memberId = :memberId ")
-    void updateDescription(Optional<String> updateDescription, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.phoneNumber = :phoneNumber WHERE c.id = :id ")
+    void updatePhoneNumber(String phoneNumber, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.grade = :grade WHERE c.memberId = :memberId ")
-    void updateGrade(Optional<Grade> updateGrade, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.description = :description WHERE c.id = :id ")
+    void updateDescription(String description, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.major = :major WHERE c.memberId = :memberId ")
-    void updateMajor(Optional<Major> updateMajor, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.grade = :grade WHERE c.id = :id ")
+    void updateGrade(Grade grade, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.track = :track WHERE c.memberId = :memberId ")
-    void updateTrack(Optional<Track> updateTrack, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.major = :major WHERE c.id = :id ")
+    void updateMajor(Major major, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.track = :track WHERE c.memberId = :memberId ")
-    void updateTechStack(Optional<TechStack> updateTechStack, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.track = :track WHERE c.id = :id ")
+    void updateTrack(Track track, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.likelionEmail = :likelionEmail WHERE c.memberId = :memberId ")
-    void updateLikelionEmail(Optional<String> updateLikelionEmail, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.likelionEmail = :likelionEmail WHERE c.id = :id ")
+    void updateLikelionEmail(String likelionEmail, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.email = :email WHERE c.memberId = :memberId ")
-    void updateEmail(Optional<String> updateEmail, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.email = :email WHERE c.id = :id ")
+    void updateEmail(String email, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.term = :term WHERE c.memberId = :memberId ")
-    void updateTerm(Optional<Integer> updateTerm, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.term = :term WHERE c.id = :id ")
+    void updateTerm(Integer term, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.position = :position WHERE c.memberId = :memberId ")
-    void updatePosition(Optional<Position> updatePosition, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.position = :position WHERE c.id = :id ")
+    void updatePosition(Position position, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.birth = :birth WHERE c.memberId = :memberId ")
-    void updateBirth(Optional<String> updateBirth, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.birth = :birth WHERE c.id = :id ")
+    void updateBirth(String birth, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.github = :github WHERE c.memberId = :memberId ")
-    void updateGithub(Optional<String> updateGithub, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.github = :github WHERE c.id = :id ")
+    void updateGithub(String github, Long id);
 
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.updateDate = :updateDate WHERE c.memberId = :memberId ")
-    void updateUpdateDate(String updateUpdateDate, Long memberId);
+    @Query("UPDATE MemberDetail c SET c.updateDate = :updateDate WHERE c.id = :id ")
+    void updateDate(String  updateDate, Long id);
 
 
 

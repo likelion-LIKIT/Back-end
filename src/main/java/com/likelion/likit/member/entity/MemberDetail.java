@@ -20,8 +20,8 @@ public class MemberDetail {
     @GeneratedValue
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id") @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @Column(nullable = false)
@@ -42,7 +42,7 @@ public class MemberDetail {
     @Enumerated(value = EnumType.STRING)
     private Track track;
 
-    @OneToMany(mappedBy = "memberdetail", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "memberDetail", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<MemberTechStack> memberTechStacks = new ArrayList<>();
 
     @Column(name = "likelion_email", unique = true)

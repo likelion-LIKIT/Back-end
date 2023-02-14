@@ -2,10 +2,7 @@ package com.likelion.likit.member;
 
 import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
-import com.likelion.likit.member.dto.LoginReqDto;
-import com.likelion.likit.member.dto.MeberUpdateReqDto;
-import com.likelion.likit.member.dto.MemberReqDto;
-import com.likelion.likit.member.dto.MemberResDto;
+import com.likelion.likit.member.dto.*;
 import com.likelion.likit.member.entity.Member;
 import com.likelion.likit.member.entity.MemberDetail;
 import com.likelion.likit.token.Token;
@@ -16,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +29,7 @@ public class MemberController{
         String encodePassword = passwordEncoder.encode(memberReqDto.getPassword());
         Member member = memberReqDto.toEntity(encodePassword);
         memberService.join(member);
-        MemberDetail memberDetail = memberReqDto.detailEntity();
+        MemberDetail memberDetail = memberReqDto.detailEntity(member);
         memberService.saveDetail(memberDetail);
         Token token = new Token(member);
         tokenService.join(token);
@@ -57,9 +56,11 @@ public class MemberController{
     @Operation(summary = "회원 정보 수정", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
     @PatchMapping("/member")
     public ResponseEntity<MemberResDto> updateUserInfo(@RequestHeader String accessToken,
-                                                       @RequestBody MeberUpdateReqDto meberUpdateReqDto) {
+                                                       @RequestPart(value = "update", required = false) MemberUpdateReqDto memberUpdateReqDto,
+                                                       @RequestPart(value = "tech", required = false) TechUpdateDto techUpdateDto) {
+
         Member member = findMemberByToken(accessToken);
-        return ResponseEntity.ok(memberService.update(member, meberUpdateReqDto));
+        return ResponseEntity.ok(memberService.update(member, memberUpdateReqDto, techUpdateDto));
     }
 
     @Operation(summary = "회원 정보 삭제", description = "Header에 accessToken 필수!")

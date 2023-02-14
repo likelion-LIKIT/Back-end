@@ -2,11 +2,14 @@ package com.likelion.likit.member;
 
 import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
-import com.likelion.likit.member.dto.MeberUpdateReqDto;
+import com.likelion.likit.member.dto.MemberUpdateReqDto;
 import com.likelion.likit.member.dto.MemberResDto;
+import com.likelion.likit.member.dto.TechUpdateDto;
 import com.likelion.likit.member.entity.*;
 import com.likelion.likit.member.repository.JpaMemberDetailRepository;
 import com.likelion.likit.member.repository.JpaMemberRepository;
+import com.likelion.likit.member.repository.JpaMemberTechStackRepository;
+import com.likelion.likit.member.repository.JpaTechStackRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,6 +29,8 @@ import java.util.Optional;
 public class MemberService  {
     private final JpaMemberRepository jpaMemberRepository;
     private final JpaMemberDetailRepository jpaMemberDetailRepository;
+    private final JpaTechStackRepository jpaTechStackRepository;
+    private final JpaMemberTechStackRepository jpaMemberTechStackRepository;
 
     @Transactional
     public Member findByStudentId(String studentId) {
@@ -49,64 +55,76 @@ public class MemberService  {
     }
 
     @Transactional
-    public MemberResDto update(Member member, MeberUpdateReqDto meberUpdateReqDto) {
+    public MemberResDto update(Member member, MemberUpdateReqDto memberUpdateReqDto, TechUpdateDto techUpdateDto) {
 
-        Optional<String> updateStudentName = meberUpdateReqDto.getStudentName();
-        Optional<String> updatePhoneNumber = meberUpdateReqDto.getPhoneNumber();
-        Optional<String> updateDescription = meberUpdateReqDto.getDescription();
-        Optional<Grade> updateGrade = meberUpdateReqDto.getGrade();
-        Optional<Major> updateMajor = meberUpdateReqDto.getMajor();
-        Optional<Track> updateTrack = meberUpdateReqDto.getTrack();
-        Optional<TechStack> updateTechStack = meberUpdateReqDto.getTechStack();
-        Optional<String> updateLikelionEmail = meberUpdateReqDto.getLikelionEmail();
-        Optional<String> updateEmail = meberUpdateReqDto.getEmail();
-        Optional<Integer> updateTerm = meberUpdateReqDto.getTerm();
-        Optional<Position> updatePosition = meberUpdateReqDto.getPosition();
-        Optional<String> updateBirth = meberUpdateReqDto.getBirth();
-        Optional<String> updateGithub = meberUpdateReqDto.getGithub();
-        String updateUpdateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+        String updateStudentName = memberUpdateReqDto.getStudentName();
+        String updatePhoneNumber = memberUpdateReqDto.getPhoneNumber();
+        String updateDescription = memberUpdateReqDto.getDescription();
+        Grade updateGrade = memberUpdateReqDto.getGrade();
+        Major updateMajor = memberUpdateReqDto.getMajor();
+        Track updateTrack = memberUpdateReqDto.getTrack();
+        String updateLikelionEmail = memberUpdateReqDto.getLikelionEmail();
+        String updateEmail = memberUpdateReqDto.getEmail();
+        Integer updateTerm = memberUpdateReqDto.getTerm();
+        Position updatePosition = memberUpdateReqDto.getPosition();
+        String updateBirth = memberUpdateReqDto.getBirth();
+        String updateGithub = memberUpdateReqDto.getGithub();
+        String updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
         Long memberId = member.getId();
+        MemberDetail memberDetails = jpaMemberDetailRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));;
+        Long id = memberDetails.getId();
+
+        List<String> tech = techUpdateDto.getTech();
+        if (tech != null) {
+            for(String ts : tech) {
+                TechStack techStack = jpaTechStackRepository.findByTechStack(ts);
+                MemberTechStack memberTechStack
+                        = MemberTechStack.builder()
+                        .memberDetail(memberDetails)
+                        .techStack(techStack)
+                        .build();
+                jpaMemberTechStackRepository.save(memberTechStack);
+            }
+        }
 
         if (updateStudentName != null) {
-            jpaMemberDetailRepository.updateStudentName(updateStudentName, memberId);
+            jpaMemberDetailRepository.updateStudentName(updateStudentName, id);
         }
         if (updatePhoneNumber != null) {
-            jpaMemberDetailRepository.updatePhoneNumber(updatePhoneNumber, memberId);
+            jpaMemberDetailRepository.updatePhoneNumber(updatePhoneNumber, id);
         }
         if (updateDescription != null) {
-            jpaMemberDetailRepository.updateDescription(updateDescription, memberId);
+            jpaMemberDetailRepository.updateDescription(updateDescription, id);
         }
         if (updateGrade != null) {
-            jpaMemberDetailRepository.updateGrade(updateGrade, memberId);
+            jpaMemberDetailRepository.updateGrade(updateGrade, id);
         }
         if (updateMajor != null) {
-            jpaMemberDetailRepository.updateMajor(updateMajor, memberId);
+            jpaMemberDetailRepository.updateMajor(updateMajor, id);
         }
         if (updateTrack != null) {
-            jpaMemberDetailRepository.updateTrack(updateTrack, memberId);
-        }
-        if (updateTechStack != null) {
-            jpaMemberDetailRepository.updateTechStack(updateTechStack, memberId);
+            jpaMemberDetailRepository.updateTrack(updateTrack, id);
         }
         if (updateLikelionEmail != null) {
             jpaMemberDetailRepository.updateLikelionEmail(updateLikelionEmail, memberId);
         }
         if (updateEmail != null) {
-            jpaMemberDetailRepository.updateEmail(updateEmail, memberId);
+            jpaMemberDetailRepository.updateEmail(updateEmail, id);
         }
         if (updateTerm != null) {
-            jpaMemberDetailRepository.updateTerm(updateTerm, memberId);
+            jpaMemberDetailRepository.updateTerm(updateTerm, id);
         }
         if (updatePosition != null) {
-            jpaMemberDetailRepository.updatePosition(updatePosition, memberId);
+            jpaMemberDetailRepository.updatePosition(updatePosition, id);
         }
         if (updateBirth != null) {
-            jpaMemberDetailRepository.updateBirth(updateBirth, memberId);
+            jpaMemberDetailRepository.updateBirth(updateBirth, id);
         }
         if (updateGithub != null) {
-            jpaMemberDetailRepository.updateGithub(updateGithub, memberId);
+            jpaMemberDetailRepository.updateGithub(updateGithub, id);
         }
-        jpaMemberDetailRepository.updateUpdateDate(updateUpdateDate, memberId);
+        jpaMemberDetailRepository.updateDate(updateDate, id);
         MemberResDto memberResDto = new MemberResDto(member);
 
         return memberResDto;
@@ -114,6 +132,6 @@ public class MemberService  {
 
     @Transactional
     public void delete(Member member) {
-        jpaMemberRepository.deleteByMember(member);
+        jpaMemberRepository.delete(member);
     }
 }
