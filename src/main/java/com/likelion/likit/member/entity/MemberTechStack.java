@@ -16,12 +16,12 @@ public class MemberTechStack {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "memberdetail_id")
     @JsonIgnore
     private MemberDetail memberDetail;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "techstack_id")
     @JsonIgnore
     private TechStack techStack;

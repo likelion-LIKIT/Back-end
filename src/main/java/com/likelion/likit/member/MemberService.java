@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,6 +78,15 @@ public class MemberService  {
 
         List<String> tech = techUpdateDto.getTech();
         if (tech != null) {
+            List<MemberTechStack> memberTechStacks = jpaMemberTechStackRepository.findAllByMemberDetail(memberDetails);
+            if (!memberTechStacks.isEmpty()){
+                List<Long> ids = new ArrayList<>();
+                for (MemberTechStack memberTechStack : memberTechStacks) {
+                    ids.add(memberTechStack.getId());
+                }
+                jpaMemberTechStackRepository.deleteAllByIdInQuery(ids);
+            }
+            List<MemberTechStack> newMemberTechStacks = new ArrayList<>();
             for(String ts : tech) {
                 TechStack techStack = jpaTechStackRepository.findByTechStack(ts);
                 MemberTechStack memberTechStack
@@ -84,8 +94,9 @@ public class MemberService  {
                         .memberDetail(memberDetails)
                         .techStack(techStack)
                         .build();
-                jpaMemberTechStackRepository.save(memberTechStack);
+                newMemberTechStacks.add(memberTechStack);
             }
+            jpaMemberTechStackRepository.saveAllAndFlush(newMemberTechStacks);
         }
 
         if (updateStudentName != null) {
@@ -129,6 +140,8 @@ public class MemberService  {
 
         return memberResDto;
     }
+
+
 
     @Transactional
     public void delete(Member member) {
