@@ -8,7 +8,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,8 +24,22 @@ public class CalendarService {
         jpaCalendarRepository.save(calendar);
     }
 
-    public List<Calendar> viewCalendar(){
-        List<Calendar> sortDate = jpaCalendarRepository.findAll(Sort.by(Sort.Direction.ASC,"dateTime"));
-        return sortDate;
+    public List<Calendar> viewCalendar(Integer year, Integer month, Integer day) {
+        List<Calendar> sortDate = jpaCalendarRepository.findAll(Sort.by(Sort.Direction.ASC, "dateTime"));
+        List<Calendar> sortYear = sortDate;
+        List<Calendar> sortMonth;
+        List<Calendar> sortDay;
+
+        if (year != null)
+            sortYear = sortDate.stream().filter(c -> c.getDateTime().getYear() == year).collect(Collectors.toList());
+        if (month != null)
+            sortMonth = sortYear.stream().filter(c -> c.getDateTime().getMonthValue() == month).collect(Collectors.toList());
+        else sortMonth = sortYear;
+        if (day != null)
+            sortDay = sortMonth.stream().filter(c -> c.getDateTime().getDayOfMonth() == day).collect(Collectors.toList());
+        else sortDay = sortMonth;
+
+        return sortDay;
     }
+
 }

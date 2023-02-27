@@ -27,7 +27,9 @@ public class CalendarController {
 
     @Operation(summary = "일정 전체 조회")
     @GetMapping("/calendar")
-    public List<Calendar> viewCalendar() {
-        return calendarService.viewCalendar();
+    public List<Calendar> viewCalendar(@RequestParam(name = "YY", required = false) Integer year,
+                                       @RequestParam(name = "MM", required = false) Integer month,
+                                       @RequestParam(name = "DD", required = false) Integer date) {
+        return calendarService.viewCalendar(year, month, date);
     }
 }
