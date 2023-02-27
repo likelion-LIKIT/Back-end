@@ -70,7 +70,7 @@ public class MemberController{
         memberService.delete(member);
     }
 
-    private Member findMemberByToken(String accessToken) {
+    public Member findMemberByToken(String accessToken) {
         String studentId = tokenService.getStudentIdFromToken(accessToken);
         Member member = memberService.findByStudentId(studentId);
         return member;
