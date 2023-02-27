@@ -4,6 +4,7 @@ import com.likelion.likit.Calendar.entity.Calendar;
 import com.likelion.likit.Calendar.repository.JpaCalendarRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class CalendarService {
     }
 
     public List<Calendar> viewCalendar(){
-        return jpaCalendarRepository.findAll();
+        List<Calendar> sortDate = jpaCalendarRepository.findAll(Sort.by(Sort.Direction.ASC,"dateTime"));
+        return sortDate;
     }
 }
