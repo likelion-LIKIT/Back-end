@@ -5,6 +5,8 @@ import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.member.dto.*;
 import com.likelion.likit.member.entity.Member;
 import com.likelion.likit.member.entity.MemberDetail;
+import com.likelion.likit.member.repository.JpaMemberDetailRepository;
+import com.likelion.likit.member.repository.JpaMemberRepository;
 import com.likelion.likit.token.Token;
 import com.likelion.likit.token.TokenDto;
 import com.likelion.likit.token.TokenService;
@@ -14,18 +16,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 public class MemberController{
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final JpaMemberRepository jpaMemberRepository;
+    private final JpaMemberDetailRepository jpaMemberDetailRepository;
 
     @Operation(summary = "회원가입", description = "성공하면 memberID 반환")
     @PostMapping("/member/new")
     public void createMember(@RequestBody MemberReqDto memberReqDto) {
+
+        if (jpaMemberRepository.findByStudentId(memberReqDto.getStudentId()).isPresent()) {
+            throw new CustomException(ExceptionEnum.STUDENTIDISPRESENT);
+        }
+        if (jpaMemberDetailRepository.findByEmail(memberReqDto.getEmail()).isPresent()) {
+            throw new CustomException(ExceptionEnum.EMAILISPRESENT);
+        }
+
         String encodePassword = passwordEncoder.encode(memberReqDto.getPassword());
         Member member = memberReqDto.toEntity(encodePassword);
         memberService.join(member);

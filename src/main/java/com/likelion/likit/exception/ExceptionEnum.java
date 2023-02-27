@@ -11,6 +11,9 @@ public enum ExceptionEnum {
     NeedSignInAgain(HttpStatus.UNAUTHORIZED,1003,"세션이 만료되었습니다."),
     PasswordNotMatched(HttpStatus.UNAUTHORIZED,1004,"비밀번호가 일치하지 않습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED,1005,"권한이 없습니다."),
+    STUDENTIDISPRESENT(HttpStatus.UNAUTHORIZED,1006,"등록된 학번입니다."),
+    EMAILISPRESENT(HttpStatus.UNAUTHORIZED,1007,"등록된 이메일입니다."),
+
 
     NOTEXIST(HttpStatus.NOT_FOUND, 2000, "존재하지 않습니다.");
 

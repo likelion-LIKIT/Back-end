@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface JpaMemberDetailRepository extends JpaRepository<MemberDetail,Long> {
 
     Optional<MemberDetail> findByMemberId(Long memberId);
+    Optional<MemberDetail> findByEmail(String email);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE MemberDetail c SET c.studentName = :studentName WHERE c.id = :id ")
