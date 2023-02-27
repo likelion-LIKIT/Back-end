@@ -4,7 +4,6 @@ import com.likelion.likit.Calendar.entity.Calendar;
 import com.likelion.likit.Calendar.entity.Tag;
 import lombok.Getter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -12,15 +11,13 @@ import java.time.LocalDateTime;
 public class CalendarReqDto {
     private String description;
     private Tag tag;
-    private LocalDate date;
-    private LocalDateTime time;
+    private LocalDateTime dateTime;
 
     public Calendar toEntity() {
         return Calendar.builder()
                 .description(description)
                 .tag(tag)
-                .date(date)
-                .time(time)
+                .dateTime(dateTime)
                 .build();
     }
 

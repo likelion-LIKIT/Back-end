@@ -24,17 +24,14 @@ public class Calendar {
     @Enumerated(value = EnumType.STRING)
     private Tag tag;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime dateTime;
 
-    @JsonFormat(pattern = "HH:mm")
-    private LocalDateTime time;
 
     @Builder
-    public Calendar(String description, Tag tag, LocalDate date, LocalDateTime time) {
+    public Calendar(String description, Tag tag, LocalDateTime dateTime) {
         this.description = description;
         this.tag = tag;
-        this.date = date;
-        this.time = time;
+        this.dateTime = dateTime;
     }
 }
