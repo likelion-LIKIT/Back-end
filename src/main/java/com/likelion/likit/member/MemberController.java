@@ -56,6 +56,18 @@ public class MemberController{
         }
     }
 
+    @Operation(summary = "비밀번호 확인", description = "성공하면 회원정보 반환")
+    @PostMapping("/member/check")
+    public ResponseEntity<MemberResDto> checkPassword(@RequestHeader String accessToken,
+                                 @RequestBody String password) {
+        Member member = findMemberByToken(accessToken);
+        if (passwordEncoder.matches(password, member.getPassword())) {
+            return ResponseEntity.ok(new MemberResDto(member));
+        } else {
+            throw new CustomException(ExceptionEnum.PasswordNotMatched);
+        }
+    }
+
     @Operation(summary = "회원정보 조회", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
     @GetMapping("/member")
     public ResponseEntity<MemberResDto> viewUserInfo(@RequestHeader String accessToken) {
