@@ -2,13 +2,14 @@ package com.likelion.likit.Calendar;
 
 import com.likelion.likit.Calendar.entity.Calendar;
 import com.likelion.likit.Calendar.repository.JpaCalendarRepository;
+import com.likelion.likit.exception.CustomException;
+import com.likelion.likit.exception.ExceptionEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,4 +43,10 @@ public class CalendarService {
         return sortDay;
     }
 
+    @Transactional
+    public void delete(Long id) {
+        Calendar calendar = jpaCalendarRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        jpaCalendarRepository.delete(calendar);
+    }
 }
