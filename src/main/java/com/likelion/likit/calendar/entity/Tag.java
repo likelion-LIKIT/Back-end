@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum Tag {
     ALL("ALL"),
     PM_DESIGN("PM_DESIGN"),
-    FRONT_END("FRONTEND"),
+    FRONT_END("FRONT_END"),
     BACK_END("BACK_END"),
     HACKATHON("HACKATHON"),
     MEETING("MEETING"),
