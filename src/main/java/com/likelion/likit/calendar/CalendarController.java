@@ -1,7 +1,7 @@
-package com.likelion.likit.Calendar;
+package com.likelion.likit.calendar;
 
-import com.likelion.likit.Calendar.dto.CalendarReqDto;
-import com.likelion.likit.Calendar.entity.Calendar;
+import com.likelion.likit.calendar.dto.CalendarReqDto;
+import com.likelion.likit.calendar.entity.Calendar;
 import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.member.MemberController;

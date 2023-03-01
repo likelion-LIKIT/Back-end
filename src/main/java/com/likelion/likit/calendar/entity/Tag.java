@@ -1,4 +1,4 @@
-package com.likelion.likit.Calendar.entity;
+package com.likelion.likit.calendar.entity;
 
 import lombok.Getter;
 

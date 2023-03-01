@@ -1,7 +1,7 @@
-package com.likelion.likit.Calendar.dto;
+package com.likelion.likit.calendar.dto;
 
-import com.likelion.likit.Calendar.entity.Calendar;
-import com.likelion.likit.Calendar.entity.Tag;
+import com.likelion.likit.calendar.entity.Calendar;
+import com.likelion.likit.calendar.entity.Tag;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

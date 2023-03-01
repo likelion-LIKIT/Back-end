@@ -1,6 +1,6 @@
-package com.likelion.likit.Calendar.repository;
+package com.likelion.likit.calendar.repository;
 
-import com.likelion.likit.Calendar.entity.Calendar;
+import com.likelion.likit.calendar.entity.Calendar;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
