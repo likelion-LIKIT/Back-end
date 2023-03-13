@@ -1,12 +1,17 @@
 package com.likelion.likit.diary.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.likelion.likit.file.entity.File;
 import com.likelion.likit.member.entity.Member;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
-import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +19,11 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 public class Diary {
+
+    @PrePersist
+    public void PrePersist() {
+        this.likes = this.likes == null ? 0 : this.likes;
+    }
 
     @Id
     @GeneratedValue
@@ -25,15 +35,42 @@ public class Diary {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
 
+    private String location;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "member_id")
     private Member member;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "diary", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "diary", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
     @Enumerated(value = EnumType.STRING)
     private Category category;
 
+    private Integer likes;
+
+    @ColumnDefault("0")
+    private int visit;
+
+    @Column(name = "creation_date") @CreatedDate
+    private String creationDate;
+
+    @Column(name = "update_date") @CreatedDate
+    private String updateDate;
+
+    @Builder
+    public Diary(String title, String description, String location, Member member, List<File> files, Category category,
+                 Integer likes, int visit) {
+        this.title = title;
+        this.description = description;
+        this.location = location;
+        this.member = member;
+        this.files = files;
+        this.category = category;
+        this.likes = likes;
+        this.visit = visit;
+        this.creationDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+        this.updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+    }
 }
