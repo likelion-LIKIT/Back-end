@@ -19,6 +19,7 @@ public class DiaryResDto {
     private Category category;
     private Integer likes;
     private int visit;
+    private String date;
     private String creationDate;
     private String updateDate;
 
@@ -32,6 +33,7 @@ public class DiaryResDto {
         this.category = diary.getCategory();
         this.likes = diary.getLikes();
         this.visit = diary.getVisit();
+        this.date = diary.getDate();
         this.creationDate = diary.getCreationDate();
         this.updateDate = diary.getUpdateDate();
     }

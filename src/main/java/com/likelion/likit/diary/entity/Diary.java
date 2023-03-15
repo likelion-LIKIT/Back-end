@@ -53,6 +53,9 @@ public class Diary {
     @ColumnDefault("0")
     private int visit;
 
+    @Column(name = "date")
+    private String date;
+
     @Column(name = "creation_date") @CreatedDate
     private String creationDate;
 
@@ -61,7 +64,7 @@ public class Diary {
 
     @Builder
     public Diary(String title, String description, String location, Member member, List<File> files, Category category,
-                 Integer likes, int visit) {
+                 Integer likes, int visit, String date) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -70,6 +73,7 @@ public class Diary {
         this.category = category;
         this.likes = likes;
         this.visit = visit;
+        this.date = String.format(date, DateTimeFormatter.ofPattern("yyy.MM.dd"));
         this.creationDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
         this.updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
     }
