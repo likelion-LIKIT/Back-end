@@ -10,6 +10,7 @@ import com.likelion.likit.file.repository.JpaFileRepository;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,7 @@ public class DiaryService {
         return null;
     }
 
+    @Transactional
     public DiaryResDto create(Member member, DiaryReqDto diaryReqDto, List<MultipartFile> files) throws Exception {
         Long id = saveDiary(member, diaryReqDto);
         List<File> fileList = fileHandler.parseFile(files);
@@ -49,5 +51,10 @@ public class DiaryService {
         List<Long> fileId = new ArrayList<>();
         DiaryResDto diaryResDto = new DiaryResDto(diary, fileId);
         return diaryResDto;
+    }
+
+
+    public List<Diary> viewDiary() {
+        return jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
     }
 }
