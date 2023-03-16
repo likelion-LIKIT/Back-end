@@ -5,6 +5,7 @@ import com.likelion.likit.diary.dto.DiaryResDto;
 import com.likelion.likit.diary.entity.Diary;
 import com.likelion.likit.diary.repository.JpaDiaryRepository;
 import com.likelion.likit.file.FileHandler;
+import com.likelion.likit.file.FileService;
 import com.likelion.likit.file.entity.File;
 import com.likelion.likit.file.repository.JpaFileRepository;
 import com.likelion.likit.member.entity.Member;
@@ -25,6 +26,7 @@ import java.util.List;
 public class DiaryService {
 
     private final FileHandler fileHandler;
+    private final FileService fileService;
     private final JpaDiaryRepository jpaDiaryRepository;
     private final JpaFileRepository jpaFileRepository;
 
@@ -36,7 +38,7 @@ public class DiaryService {
         if (!fileList.isEmpty()) {
             for (File file : fileList) {
                 Long fileId = jpaFileRepository.save(file).getId();
-                jpaFileRepository.updateboard(diary, fileId);
+                jpaFileRepository.updatediary(diary, fileId);
             }
         }
         return null;
@@ -48,6 +50,7 @@ public class DiaryService {
         List<File> fileList = fileHandler.parseFile(files);
         Diary diary = jpaDiaryRepository.getReferenceById(id);
         fileId(fileList, diary);
+        fileService.findAllByDiary(id);
         List<Long> fileId = new ArrayList<>();
         DiaryResDto diaryResDto = new DiaryResDto(diary, fileId);
         return diaryResDto;

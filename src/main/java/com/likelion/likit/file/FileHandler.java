@@ -43,7 +43,7 @@ public class FileHandler {
                     if (contentType.contains("image/jpeg")) fileExtension = ".jpg";
                     else if (contentType.contains("image/jpg")) fileExtension = ".jpg";
                     else if (contentType.contains("image/png")) fileExtension = ".png";
-                    else if (contentType.contains("application.pdf")) fileExtension = ".pdf";
+                    else if (contentType.contains("application/pdf")) fileExtension = ".pdf";
                     else break;
                 }
 

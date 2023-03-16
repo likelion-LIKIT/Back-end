@@ -15,7 +15,8 @@ public enum ExceptionEnum {
     EMAILISPRESENT(HttpStatus.UNAUTHORIZED,1007,"등록된 이메일입니다."),
 
 
-    NOTEXIST(HttpStatus.NOT_FOUND, 2000, "존재하지 않습니다.");
+    NOTEXIST(HttpStatus.NOT_FOUND, 2000, "존재하지 않습니다."),
+    FILENOTEXIST(HttpStatus.NOT_FOUND, 2001, "해당 파일이 존재하지 않습니다.");
 
     private HttpStatus status;
     private int code;
