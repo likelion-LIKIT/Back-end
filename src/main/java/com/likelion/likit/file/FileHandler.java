@@ -15,7 +15,7 @@ import java.util.List;
 @Component
 public class FileHandler {
 
-    public List<File> parseFile(List<MultipartFile> multipartFiles) throws Exception {
+    public List<File> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail) throws Exception {
         List<File> files = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(multipartFiles)) {
@@ -54,13 +54,15 @@ public class FileHandler {
                         .fileName(multipartFile.getOriginalFilename())
                         .filePath(path + java.io.File.separator + saveFileName)
                         .fileSize(multipartFile.getSize())
+                        .isThumbnail(isThumbnail)
                         .build();
 
 
                 File file1 = new File(
                         fileDto.getFileName(),
                         fileDto.getFilePath(),
-                        fileDto.getFileSize()
+                        fileDto.getFileSize(),
+                        fileDto.isThumbnail()
                 );
 
                 files.add(file1);

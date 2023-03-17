@@ -2,6 +2,7 @@ package com.likelion.likit.diary.dto;
 
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
+import com.likelion.likit.file.entity.File;
 import com.likelion.likit.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,9 +26,10 @@ public class DiaryReqDto {
         this.date = diary.getDate();
     }
 
-    public Diary toEntity(Member member) {
+    public Diary toEntity(Member member, File thumbnail) {
         return Diary.builder()
                 .member(member)
+                .thumbnail(thumbnail)
                 .title(title)
                 .description(description)
                 .location(location)

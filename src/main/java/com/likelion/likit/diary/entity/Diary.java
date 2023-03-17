@@ -45,6 +45,10 @@ public class Diary {
     @OneToMany(mappedBy = "diary", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
+    private File thumbnail;
+
     @Enumerated(value = EnumType.STRING)
     private Category category;
 
@@ -63,13 +67,14 @@ public class Diary {
     private String updateDate;
 
     @Builder
-    public Diary(String title, String description, String location, Member member, List<File> files, Category category,
+    public Diary(String title, String description, String location, Member member, List<File> files, File thumbnail, Category category,
                  Integer likes, int visit, String date) {
         this.title = title;
         this.description = description;
         this.location = location;
         this.member = member;
         this.files = files;
+        this.thumbnail = thumbnail;
         this.category = category;
         this.likes = likes;
         this.visit = visit;
