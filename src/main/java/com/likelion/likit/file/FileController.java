@@ -37,7 +37,6 @@ public class FileController {
     )
     public ResponseEntity<byte[]> getFile(@PathVariable Long id) throws IOException {
         FileDto fileDto = fileService.findByFileId(id);
-        System.out.println("fileDto" + fileDto);
         String absolutePath
                 = new File("").getAbsolutePath() + File.separator + File.separator;
         String path = fileDto.getFilePath();
