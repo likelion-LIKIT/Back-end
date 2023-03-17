@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,17 +29,19 @@ public class FileService {
                 .fileName(file.getFileName())
                 .filePath(file.getFilePath())
                 .fileSize(file.getFileSize())
+                .isThumbnail(file.isThumbnail())
                 .build();
 
         return fileDto;
     }
 
     @Transactional(readOnly = true)
-    public List<FileResDto> findAllByDiary(Long id) {
-        List<File> fileList = jpaFileRepository.findAllByDiaryId(id);
-
-        return fileList.stream()
-                .map(FileResDto::new)
-                .collect(Collectors.toList());
+    public List<Long> findAllByDiary(Long id, boolean isThumbnail) {
+        List<File> fileList = jpaFileRepository.findAllByDiaryIdAndIsThumbnail(id, isThumbnail);
+        List<Long> fileId = new ArrayList<>();
+        for (File file : fileList) {
+            fileId.add(file.getId());
+        }
+        return fileId;
     }
 }

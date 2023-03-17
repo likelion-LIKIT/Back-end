@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface JpaFileRepository extends JpaRepository<File, Long> {
-    List<File> findAllByDiaryId(Long diaryId);
+    List<File> findAllByDiaryIdAndIsThumbnail(Long diaryId, boolean isThumbnail);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE File c SET c.diary = :diary WHERE c.id = :id ")
