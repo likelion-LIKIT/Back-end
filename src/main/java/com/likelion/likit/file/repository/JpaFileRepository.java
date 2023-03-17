@@ -14,4 +14,6 @@ public interface JpaFileRepository extends JpaRepository<File, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE File c SET c.diary = :diary WHERE c.id = :id ")
     void updatediary(Diary diary, Long id);
+
+    File findByDiaryIdAndIsThumbnail(Long diaryId, boolean isThumbnail);
 }

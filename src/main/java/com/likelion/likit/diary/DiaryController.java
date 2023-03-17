@@ -50,5 +50,20 @@ public class DiaryController {
         return diaryService.view();
     }
 
+    @Operation(summary = "diary 수정", description = "성공하면 아래의 내용이 수정됨" + "\n\n" +
+            "title"+ "\n\n" +
+            "description"+ "\n\n" +
+            "location"+ "\n\n" +
+            "category"+ "\n\n" +
+            "date")
+    @PatchMapping("/diary/{id}")
+    public ResponseEntity<DiaryResDto> updateBoard(@RequestHeader(name = "accessToken") String accessToken,
+                                                   @PathVariable Long id,
+                                                   @RequestPart(value = "diaryReqDto", required = false) DiaryReqDto diaryReqDto,
+                                                   @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
+                                                   @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        return ResponseEntity.ok(diaryService.update(id, member, diaryReqDto, thumbnail, files));
+    }
 
 }
