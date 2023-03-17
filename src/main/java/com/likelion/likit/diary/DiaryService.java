@@ -1,7 +1,7 @@
 package com.likelion.likit.diary;
 
 import com.likelion.likit.diary.dto.DiaryReqDto;
-import com.likelion.likit.diary.dto.DiaryResDto;
+import com.likelion.likit.diary.dto.DiaryThumbnailDto;
 import com.likelion.likit.diary.entity.Diary;
 import com.likelion.likit.diary.repository.JpaDiaryRepository;
 import com.likelion.likit.file.FileHandler;
@@ -30,8 +30,8 @@ public class DiaryService {
     private final JpaDiaryRepository jpaDiaryRepository;
     private final JpaFileRepository jpaFileRepository;
 
-    public Long saveDiary(Member member, DiaryReqDto diaryReqDto) {
-        return jpaDiaryRepository.save(diaryReqDto.toEntity(member)).getId();
+    public Long saveDiary(Member member, File thumbnail, DiaryReqDto diaryReqDto) {
+        return jpaDiaryRepository.save(diaryReqDto.toEntity(member, thumbnail)).getId();
     }
 
     public Long fileId(List<File> fileList, Diary diary) {
@@ -45,19 +45,29 @@ public class DiaryService {
     }
 
     @Transactional
-    public DiaryResDto create(Member member, DiaryReqDto diaryReqDto, List<MultipartFile> files) throws Exception {
-        Long id = saveDiary(member, diaryReqDto);
-        List<File> fileList = fileHandler.parseFile(files);
+    public void create(Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
+        List<File> fileList = fileHandler.parseFile(files, false);
+        List<File> thumbnailFile = fileHandler.parseFile(thumbnail, true);
+        Long id = saveDiary(member, thumbnailFile.get(0), diaryReqDto);
         Diary diary = jpaDiaryRepository.getReferenceById(id);
         fileId(fileList, diary);
-        fileService.findAllByDiary(id);
-        List<Long> fileId = new ArrayList<>();
-        DiaryResDto diaryResDto = new DiaryResDto(diary, fileId);
-        return diaryResDto;
+        fileId(thumbnailFile, diary);
+//        DiaryResDto diaryResDto = new DiaryResDto(diary);
+//        return diaryResDto;
     }
 
 
     public List<Diary> viewDiary() {
         return jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+    }
+
+    public List<DiaryThumbnailDto> viewDiaryWithThumbnail() {
+        List<Diary> diaries = jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+        List<DiaryThumbnailDto> diaryThumbnailDtos = new ArrayList<>();
+        for (Diary diary : diaries){
+            System.out.println(diary.getThumbnail().getId());
+            diaryThumbnailDtos.add(new DiaryThumbnailDto(diary));
+        }
+        return diaryThumbnailDtos;
     }
 }

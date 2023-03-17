@@ -2,9 +2,12 @@ package com.likelion.likit.diary.dto;
 
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
+import com.likelion.likit.file.entity.File;
 import com.likelion.likit.member.entity.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,6 +19,7 @@ public class DiaryResDto {
     private String location;
     private WriterDto member;
     private List<Long> fileId;
+    private Long thumbnailId;
     private Category category;
     private Integer likes;
     private int visit;
@@ -23,19 +27,28 @@ public class DiaryResDto {
     private String creationDate;
     private String updateDate;
 
-    public DiaryResDto(Diary diary, List<Long> fileId) {
+    public DiaryResDto(Diary diary) {
         this.id = diary.getId();
         this.title = diary.getTitle();
         this.description = diary.getDescription();
         this.location = diary.getLocation();
         this.member = new WriterDto(diary.getMember());
-        this.fileId = fileId;
+        this.fileId = makeFileList(diary.getFiles());
+        this.thumbnailId = diary.getThumbnail().getId();
         this.category = diary.getCategory();
         this.likes = diary.getLikes();
         this.visit = diary.getVisit();
         this.date = diary.getDate();
         this.creationDate = diary.getCreationDate();
         this.updateDate = diary.getUpdateDate();
+    }
+
+    public List<Long> makeFileList(List<File> fileList){
+        List<Long> fileIdList = new ArrayList<>();
+        for (File file : fileList) {
+            fileIdList.add(file.getId());
+        }
+        return fileIdList;
     }
 
     @Getter

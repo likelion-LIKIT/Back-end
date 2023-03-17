@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-public class DiaryThubnailDto {
+public class DiaryThumbnailDto {
     private Long id;
     private String title;
     private String description;
@@ -26,7 +26,7 @@ public class DiaryThubnailDto {
     private String creationDate;
     private String updateDate;
 
-    public DiaryThubnailDto(Diary diary) {
+    public DiaryThumbnailDto(Diary diary) {
         this.id = diary.getId();
         this.title = diary.getTitle();
         this.description = diary.getDescription();
