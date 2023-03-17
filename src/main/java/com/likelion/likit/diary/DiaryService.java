@@ -88,6 +88,15 @@ public class DiaryService {
     }
 
     @Transactional
+    public DiaryResDto viewOne(Long id) {
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        int visit = diary.getVisit();
+        jpaDiaryRepository.updateVisit(visit+1, id);
+        Diary newDiary = jpaDiaryRepository.getReferenceById(id);
+        return new DiaryResDto(newDiary);
+    }
+
+    @Transactional
     public DiaryResDto update(Long id, Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         if (diary.getMember() == member) {

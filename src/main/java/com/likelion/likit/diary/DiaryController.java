@@ -44,10 +44,16 @@ public class DiaryController {
         return diaryService.viewDiaryWithThumbnail();
     }
 
-    @Operation(summary = "thumbnail과 함께 diary 글 조회", description = "Diary 글 조희")
+    @Operation(summary = "diary 글 정보 모두 조회", description = "Diary 글 조희")
     @GetMapping("/diary/all")
     public List<DiaryResDto> viewAll() {
         return diaryService.view();
+    }
+
+    @Operation(summary = "diary id 글 정보 모두 조회", description = "해당 Diary 글 조희 + 조회수 증가")
+    @GetMapping("/diary/{id}")
+    public DiaryResDto viewone(@PathVariable Long id) {
+        return diaryService.viewOne(id);
     }
 
     @Operation(summary = "diary 수정", description = "성공하면 아래의 내용이 수정됨" + "\n\n" +
@@ -65,5 +71,7 @@ public class DiaryController {
         Member member = memberController.findMemberByToken(accessToken);
         return ResponseEntity.ok(diaryService.update(id, member, diaryReqDto, thumbnail, files));
     }
+
+
 
 }
