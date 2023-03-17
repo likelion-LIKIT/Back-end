@@ -1,6 +1,7 @@
 package com.likelion.likit.diary;
 
 import com.likelion.likit.diary.dto.DiaryReqDto;
+import com.likelion.likit.diary.dto.DiaryResDto;
 import com.likelion.likit.diary.dto.DiaryThumbnailDto;
 import com.likelion.likit.diary.entity.Diary;
 import com.likelion.likit.diary.repository.JpaDiaryRepository;
@@ -69,5 +70,15 @@ public class DiaryService {
             diaryThumbnailDtos.add(new DiaryThumbnailDto(diary));
         }
         return diaryThumbnailDtos;
+    }
+
+    public List<DiaryResDto> view() {
+        List<Diary> diaries = jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+        List<DiaryResDto> diaryResDto = new ArrayList<>();
+        for (Diary diary : diaries){
+            System.out.println(diary.getThumbnail().getId());
+            diaryResDto.add(new DiaryResDto(diary));
+        }
+        return diaryResDto;
     }
 }

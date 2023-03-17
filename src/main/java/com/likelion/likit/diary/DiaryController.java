@@ -1,6 +1,7 @@
 package com.likelion.likit.diary;
 
 import com.likelion.likit.diary.dto.DiaryReqDto;
+import com.likelion.likit.diary.dto.DiaryResDto;
 import com.likelion.likit.diary.dto.DiaryThumbnailDto;
 import com.likelion.likit.diary.entity.Diary;
 import com.likelion.likit.member.MemberController;
@@ -37,10 +38,16 @@ public class DiaryController {
         return diaryService.viewDiary();
     }
 
-    @Operation(summary = "diary 글 조회", description = "Diary 글 조희")
-    @GetMapping("/diary/thubnail")
+    @Operation(summary = "thumbnail과 함께 diary 글 조회", description = "Diary 글 조희")
+    @GetMapping("/diary/thumbnail")
     public List<DiaryThumbnailDto> viewDiaryWithThubnail() {
         return diaryService.viewDiaryWithThumbnail();
+    }
+
+    @Operation(summary = "thumbnail과 함께 diary 글 조회", description = "Diary 글 조희")
+    @GetMapping("/diary/all")
+    public List<DiaryResDto> viewAll() {
+        return diaryService.view();
     }
 
 
