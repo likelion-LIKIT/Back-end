@@ -8,6 +8,7 @@ import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,13 +24,13 @@ public class DiaryController {
 
     @Operation(summary = "diary 글 작성", description = "성공하면 게시글이 Diary 데이터베이스에 저장")
     @PostMapping("/diary")
-    public ResponseEntity<Integer> create(@RequestHeader String accessToken,
-                                              @RequestPart(value = "diaryReqDto") DiaryReqDto diaryReqDto,
-                                              @RequestPart(value = "thumbnail")List<MultipartFile> thumbnail,
-                                              @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+    public ResponseEntity<String> create(@RequestHeader String accessToken,
+                                 @RequestPart(value = "diaryReqDto") DiaryReqDto diaryReqDto,
+                                 @RequestPart(value = "thumbnail")List<MultipartFile> thumbnail,
+                                 @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         diaryService.create(member, diaryReqDto, thumbnail, files);
-        return ResponseEntity.ok(1);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
     @Operation(summary = "diary 글 조회", description = "Diary 글 조희")
@@ -63,13 +64,14 @@ public class DiaryController {
             "category"+ "\n\n" +
             "date")
     @PatchMapping("/diary/{id}")
-    public ResponseEntity<DiaryResDto> updateBoard(@RequestHeader(name = "accessToken") String accessToken,
+    public ResponseEntity<String> updateBoard(@RequestHeader(name = "accessToken") String accessToken,
                                                    @PathVariable Long id,
                                                    @RequestPart(value = "diaryReqDto", required = false) DiaryReqDto diaryReqDto,
                                                    @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
                                                    @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
-        return ResponseEntity.ok(diaryService.update(id, member, diaryReqDto, thumbnail, files));
+        diaryService.update(id, member, diaryReqDto, thumbnail, files);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
 
