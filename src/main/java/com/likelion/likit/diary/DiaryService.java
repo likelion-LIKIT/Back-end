@@ -122,20 +122,22 @@ public class DiaryService {
                 }
                 jpaDiaryRepository.updateUpdateDate(updateDateTime, id);
             }
-        }
-        if (thumbnail != null) {
-            File baseThumbnail = jpaFileRepository.findByDiaryIdAndIsThumbnail(id, true);
-            jpaFileRepository.delete(baseThumbnail);
-            List<File> thumbnailFile = fileHandler.parseFile(thumbnail, true);
-            fileId(thumbnailFile, diary);
-        }
-        if (files != null) {
-            List<File> baseFileList = jpaFileRepository.findAllByDiaryIdAndIsThumbnail(id, false);
-            List<File> fileList = fileHandler.parseFile(files, false);
-            for (File file : baseFileList) {
-                jpaFileRepository.delete(file);
+            if (thumbnail != null) {
+                File baseThumbnail = jpaFileRepository.findByDiaryIdAndIsThumbnail(id, true);
+                jpaFileRepository.delete(baseThumbnail);
+                List<File> thumbnailFile = fileHandler.parseFile(thumbnail, true);
+                fileId(thumbnailFile, diary);
             }
-            fileId(fileList, diary);
+            if (files != null) {
+                List<File> baseFileList = jpaFileRepository.findAllByDiaryIdAndIsThumbnail(id, false);
+                List<File> fileList = fileHandler.parseFile(files, false);
+                for (File file : baseFileList) {
+                    jpaFileRepository.delete(file);
+                }
+                fileId(fileList, diary);
+            }
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
         }
     }
 }
