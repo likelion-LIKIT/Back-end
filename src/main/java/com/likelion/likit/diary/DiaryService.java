@@ -140,4 +140,14 @@ public class DiaryService {
             throw new CustomException(ExceptionEnum.StudentIdNotMatched);
         }
     }
+
+    @Transactional
+    public void delete(Long id, Member member) {
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (member == diary.getMember()) {
+            jpaDiaryRepository.delete(diary);
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
 }

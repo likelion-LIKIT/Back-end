@@ -64,13 +64,22 @@ public class DiaryController {
             "category"+ "\n\n" +
             "date")
     @PatchMapping("/diary/{id}")
-    public ResponseEntity<String> updateBoard(@RequestHeader(name = "accessToken") String accessToken,
+    public ResponseEntity<String> updateDiary(@RequestHeader(name = "accessToken") String accessToken,
                                                    @PathVariable Long id,
                                                    @RequestPart(value = "diaryReqDto", required = false) DiaryReqDto diaryReqDto,
                                                    @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
                                                    @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         diaryService.update(id, member, diaryReqDto, thumbnail, files);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
+    @Operation(summary = "diary 삭제", description = "해당 id 값의 diary 삭제")
+    @DeleteMapping("diary/{id}")
+    public ResponseEntity<String> deleteDiary(@RequestHeader(name = "accessToken") String accessToken,
+                                              @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        diaryService.delete(id, member);
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
