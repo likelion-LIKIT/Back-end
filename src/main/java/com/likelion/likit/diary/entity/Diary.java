@@ -52,6 +52,10 @@ public class Diary {
     @Enumerated(value = EnumType.STRING)
     private Category category;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "diary", fetch = FetchType.LAZY)
+    private List<LikeMembers> likeMembers = new ArrayList<>();
+
     private Integer likes;
 
     @ColumnDefault("0")
@@ -68,7 +72,7 @@ public class Diary {
 
     @Builder
     public Diary(String title, String description, String location, Member member, List<File> files, File thumbnail, Category category,
-                 Integer likes, int visit, String date) {
+                 List<LikeMembers> likeMembers, Integer likes, int visit, String date) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -76,6 +80,7 @@ public class Diary {
         this.files = files;
         this.thumbnail = thumbnail;
         this.category = category;
+        this.likeMembers = likeMembers;
         this.likes = likes;
         this.visit = visit;
         this.date = String.format(date, DateTimeFormatter.ofPattern("yyy.MM.dd"));
