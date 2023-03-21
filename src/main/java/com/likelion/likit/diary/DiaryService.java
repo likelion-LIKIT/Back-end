@@ -58,8 +58,6 @@ public class DiaryService {
         Diary diary = jpaDiaryRepository.getReferenceById(id);
         fileId(fileList, diary);
         fileId(thumbnailFile, diary);
-//        DiaryResDto diaryResDto = new DiaryResDto(diary);
-//        return diaryResDto;
     }
 
 
@@ -97,7 +95,7 @@ public class DiaryService {
     }
 
     @Transactional
-    public DiaryResDto update(Long id, Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
+    public void update(Long id, Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         if (diary.getMember() == member) {
             if (diaryReqDto != null) {
@@ -139,8 +137,5 @@ public class DiaryService {
             }
             fileId(fileList, diary);
         }
-        Diary updateDiary = jpaDiaryRepository.getReferenceById(id);
-        DiaryResDto diaryResDto = new DiaryResDto(updateDiary);
-        return diaryResDto;
     }
 }
