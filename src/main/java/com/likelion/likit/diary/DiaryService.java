@@ -5,7 +5,9 @@ import com.likelion.likit.diary.dto.DiaryResDto;
 import com.likelion.likit.diary.dto.DiaryThumbnailDto;
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
+import com.likelion.likit.diary.entity.LikeMembers;
 import com.likelion.likit.diary.repository.JpaDiaryRepository;
+import com.likelion.likit.diary.repository.JpaDiaryLikeRepository;
 import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.file.FileHandler;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -35,6 +38,7 @@ public class DiaryService {
     private final FileService fileService;
     private final JpaDiaryRepository jpaDiaryRepository;
     private final JpaFileRepository jpaFileRepository;
+    private final JpaDiaryLikeRepository jpaDiaryLikeRepository;
 
     public Long saveDiary(Member member, File thumbnail, DiaryReqDto diaryReqDto) {
         return jpaDiaryRepository.save(diaryReqDto.toEntity(member, thumbnail)).getId();
@@ -58,8 +62,6 @@ public class DiaryService {
         Diary diary = jpaDiaryRepository.getReferenceById(id);
         fileId(fileList, diary);
         fileId(thumbnailFile, diary);
-//        DiaryResDto diaryResDto = new DiaryResDto(diary);
-//        return diaryResDto;
     }
 
 
@@ -97,7 +99,7 @@ public class DiaryService {
     }
 
     @Transactional
-    public DiaryResDto update(Long id, Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
+    public void update(Long id, Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         if (diary.getMember() == member) {
             if (diaryReqDto != null) {
@@ -124,23 +126,62 @@ public class DiaryService {
                 }
                 jpaDiaryRepository.updateUpdateDate(updateDateTime, id);
             }
-        }
-        if (thumbnail != null) {
-            File baseThumbnail = jpaFileRepository.findByDiaryIdAndIsThumbnail(id, true);
-            jpaFileRepository.delete(baseThumbnail);
-            List<File> thumbnailFile = fileHandler.parseFile(thumbnail, true);
-            fileId(thumbnailFile, diary);
-        }
-        if (files != null) {
-            List<File> baseFileList = jpaFileRepository.findAllByDiaryIdAndIsThumbnail(id, false);
-            List<File> fileList = fileHandler.parseFile(files, false);
-            for (File file : baseFileList) {
-                jpaFileRepository.delete(file);
+            if (thumbnail != null) {
+                File baseThumbnail = jpaFileRepository.findByDiaryIdAndIsThumbnail(id, true);
+                jpaFileRepository.delete(baseThumbnail);
+                List<File> thumbnailFile = fileHandler.parseFile(thumbnail, true);
+                fileId(thumbnailFile, diary);
             }
-            fileId(fileList, diary);
+            if (files != null) {
+                List<File> baseFileList = jpaFileRepository.findAllByDiaryIdAndIsThumbnail(id, false);
+                List<File> fileList = fileHandler.parseFile(files, false);
+                for (File file : baseFileList) {
+                    jpaFileRepository.delete(file);
+                }
+                fileId(fileList, diary);
+            }
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
         }
-        Diary updateDiary = jpaDiaryRepository.getReferenceById(id);
-        DiaryResDto diaryResDto = new DiaryResDto(updateDiary);
-        return diaryResDto;
+    }
+
+    @Transactional
+    public void delete(Long id, Member member) {
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (member == diary.getMember()) {
+            jpaDiaryRepository.delete(diary);
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
+    @Transactional
+    public String like(Long id, Member member) {
+        String result = "LIKE";
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        Optional<LikeMembers> liked = jpaDiaryLikeRepository.findByDiaryAndMember(diary, member);
+        if (!liked.isPresent()){
+            LikeMembers likeMember = LikeMembers.builder()
+                    .diary(diary)
+                    .member(member)
+                    .build();
+            jpaDiaryLikeRepository.save(likeMember);
+        } else {
+            jpaDiaryLikeRepository.delete(liked.get());
+            result = "UNLIKE";
+        }
+        Integer count = jpaDiaryLikeRepository.findByDiaryId(id).size();
+        jpaDiaryRepository.updateLikes(count, id);
+        return result;
+    }
+
+    public String checkLike(Long id, Member member) {
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        Optional<LikeMembers> liked = jpaDiaryLikeRepository.findByDiaryAndMember(diary, member);
+        if (liked.isPresent()){
+            return "LIKED";
+        } else {
+            return "UNLIKED";
+        }
     }
 }

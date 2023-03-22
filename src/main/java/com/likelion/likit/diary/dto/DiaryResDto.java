@@ -2,6 +2,7 @@ package com.likelion.likit.diary.dto;
 
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
+import com.likelion.likit.diary.entity.LikeMembers;
 import com.likelion.likit.file.entity.File;
 import com.likelion.likit.member.entity.*;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class DiaryResDto {
     private List<Long> fileId;
     private Long thumbnailId;
     private Category category;
+    private List<Long> likeMemeber = new ArrayList<>();
     private Integer likes;
     private int visit;
     private String date;
@@ -36,6 +38,10 @@ public class DiaryResDto {
         this.fileId = makeFileList(diary.getFiles());
         this.thumbnailId = new FileDto(diary.getThumbnail()).getId();
         this.category = diary.getCategory();
+        List<LikeMembers> likeMembers = diary.getLikeMembers();
+        for (LikeMembers likeMember : likeMembers) {
+            this.likeMemeber.add(likeMember.getMember().getId());
+        }
         this.likes = diary.getLikes();
         this.visit = diary.getVisit();
         this.date = diary.getDate();

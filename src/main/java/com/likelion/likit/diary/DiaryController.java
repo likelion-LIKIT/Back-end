@@ -8,6 +8,7 @@ import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,13 +24,13 @@ public class DiaryController {
 
     @Operation(summary = "diary 글 작성", description = "성공하면 게시글이 Diary 데이터베이스에 저장")
     @PostMapping("/diary")
-    public ResponseEntity<Integer> create(@RequestHeader String accessToken,
-                                              @RequestPart(value = "diaryReqDto") DiaryReqDto diaryReqDto,
-                                              @RequestPart(value = "thumbnail")List<MultipartFile> thumbnail,
-                                              @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+    public ResponseEntity<String> create(@RequestHeader String accessToken,
+                                 @RequestPart(value = "diaryReqDto") DiaryReqDto diaryReqDto,
+                                 @RequestPart(value = "thumbnail")List<MultipartFile> thumbnail,
+                                 @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         diaryService.create(member, diaryReqDto, thumbnail, files);
-        return ResponseEntity.ok(1);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
     @Operation(summary = "diary 글 조회", description = "Diary 글 조희")
@@ -63,15 +64,44 @@ public class DiaryController {
             "category"+ "\n\n" +
             "date")
     @PatchMapping("/diary/{id}")
-    public ResponseEntity<DiaryResDto> updateBoard(@RequestHeader(name = "accessToken") String accessToken,
+    public ResponseEntity<String> updateDiary(@RequestHeader(name = "accessToken") String accessToken,
                                                    @PathVariable Long id,
                                                    @RequestPart(value = "diaryReqDto", required = false) DiaryReqDto diaryReqDto,
                                                    @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
                                                    @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
-        return ResponseEntity.ok(diaryService.update(id, member, diaryReqDto, thumbnail, files));
+        diaryService.update(id, member, diaryReqDto, thumbnail, files);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @Operation(summary = "diary 삭제", description = "해당 id 값의 diary 삭제")
+    @DeleteMapping("diary/{id}")
+    public ResponseEntity<String> deleteDiary(@RequestHeader(name = "accessToken") String accessToken,
+                                              @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        diaryService.delete(id, member);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
 
+    @Operation(summary = "diary 좋아요 등록 및 취소", description =  "해당 글 좋아요 누른 적이 없으면 해당 글에 좋아요 등록 및 좋아요 수 Up &"+ "\n\n" +
+            " 해당 글에 좋아요 누른 적이 있으면 해당 글에 좋아요 취소 및 좋아요 수 Down")
+    @PostMapping("diary/{id}/like")
+    public ResponseEntity<String> likeDiary(@RequestHeader(name = "accessToken") String accessToken,
+                                            @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        String result = diaryService.like(id, member) + " Success";
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Operation(summary = "diary 좋아요 등록 여부 확인", description = "해당 USER가 좋아요를 눌렀는지 확인 여부"+"\n\n"+
+            "해당 USER가 좋아요 리스트에 존재하면 \"LIKED\"" +"\n\n"+
+            "해당 USER가 좋아요 리스트에 존재하지 않으면 \"UNLIKED\""+"\n\n")
+    @GetMapping("diary/{id}/check")
+    public ResponseEntity<String> checkLiked(@RequestHeader(name = "accessToken") String accessToken,
+                                             @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+
+        return new ResponseEntity<>(diaryService.checkLike(id, member), HttpStatus.OK);
+    }
 
 }
