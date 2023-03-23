@@ -32,9 +32,9 @@ public class DiaryController {
     @Operation(summary = "diary 글 작성", description = "성공하면 게시글이 Diary 데이터베이스에 저장")
     @PostMapping("/diary")
     public ResponseEntity<String> create(@RequestHeader String accessToken,
-                                 @RequestPart(value = "diaryReqDto") DiaryReqDto diaryReqDto,
-                                 @RequestPart(value = "thumbnail")List<MultipartFile> thumbnail,
-                                 @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+                                         @RequestPart(value = "diaryReqDto") DiaryReqDto diaryReqDto,
+                                         @RequestPart(value = "thumbnail")List<MultipartFile> thumbnail,
+                                         @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         diaryService.create(member, diaryReqDto, thumbnail, files);
         return new ResponseEntity<>("Success", HttpStatus.OK);
@@ -72,10 +72,10 @@ public class DiaryController {
             "date")
     @PatchMapping("/diary/{id}")
     public ResponseEntity<String> updateDiary(@RequestHeader(name = "accessToken") String accessToken,
-                                                   @PathVariable Long id,
-                                                   @RequestPart(value = "diaryReqDto", required = false) DiaryReqDto diaryReqDto,
-                                                   @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
-                                                   @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+                                              @PathVariable Long id,
+                                              @RequestPart(value = "diaryReqDto", required = false) DiaryReqDto diaryReqDto,
+                                              @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
+                                              @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         diaryService.update(id, member, diaryReqDto, thumbnail, files);
         return new ResponseEntity<>("Success", HttpStatus.OK);
@@ -115,7 +115,7 @@ public class DiaryController {
     @Operation(summary = "diary 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 diary 파일 출력")
     @GetMapping(
             value = "diary/file/{id}",
-            produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.APPLICATION_PDF_VALUE}
+            produces = {MediaType.ALL_VALUE}
     )
     public ResponseEntity<byte[]> getDiaryFile(@PathVariable Long id) throws IOException {
         FileDto fileDto = diaryService.findDiaryByFileId(id);
@@ -130,4 +130,9 @@ public class DiaryController {
         return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
+    @Operation(summary = "diary 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
+    @GetMapping("diary/download/{id}")
+    public ResponseEntity<Object> downloadDiaryFile(@PathVariable Long id) throws IOException {
+        return diaryService.download(id);
+    }
 }
