@@ -8,6 +8,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -16,7 +19,7 @@ import java.util.List;
 @Component
 public class DiaryFileHandler {
 
-    @Value("${upload.path}")
+    @Value("${part4.upload.path}")
     private String uploadPath;
 
     public List<DiaryFile> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail) throws Exception {
@@ -71,8 +74,9 @@ public class DiaryFileHandler {
 
                 diaryFiles.add(diaryFile1);
 
-                file = new java.io.File(uploadPath + path + java.io.File.separator + saveFileName);
-                multipartFile.transferTo(file);
+                String saveName = uploadPath + File.separator + path + File.separator + saveFileName;
+                Path savedPath = Paths.get(saveName);
+                multipartFile.transferTo(savedPath);
 
                 file.setWritable(true);
                 file.setReadable(true);

@@ -10,8 +10,9 @@ spring:
       enabled: true
       location : /Users/kathylee/Desktop/
 
-upload:
-  path: /Users/kathylee/Desktop/
+part4:
+  upload:
+    path: /Users/kathylee/Desktop/
 
 springdoc:
   version: '@project.version@'
