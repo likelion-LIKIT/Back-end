@@ -12,7 +12,7 @@ public interface JpaDiaryFileRepository extends JpaRepository<DiaryFile, Long> {
     List<DiaryFile> findAllByDiaryIdAndIsThumbnail(Long diaryId, boolean isThumbnail);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE File c SET c.diary = :diary WHERE c.id = :id ")
+    @Query("UPDATE DiaryFile c SET c.diary = :diary WHERE c.id = :id ")
     void updatediary(Diary diary, Long id);
 
     DiaryFile findByDiaryIdAndIsThumbnail(Long diaryId, boolean isThumbnail);
