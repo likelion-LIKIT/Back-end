@@ -1,4 +1,4 @@
-package com.likelion.likit.file.entity;
+package com.likelion.likit.diary.entity;
 
 import com.likelion.likit.diary.entity.Diary;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @Entity
 @NoArgsConstructor
-public class File {
+public class DiaryFile {
 
     @Id
     @GeneratedValue
@@ -30,7 +30,7 @@ public class File {
     private boolean isThumbnail;
 
     @Builder
-    public File(String fileName, String filePath, Long fileSize, boolean isThumbnail) {
+    public DiaryFile(String fileName, String filePath, Long fileSize, boolean isThumbnail) {
         this.fileName = fileName;
         this.filePath = filePath;
         this.fileSize = fileSize;

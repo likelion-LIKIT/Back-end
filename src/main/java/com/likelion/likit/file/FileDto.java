@@ -1,4 +1,4 @@
-package com.likelion.likit.file.dto;
+package com.likelion.likit.file;
 
 import lombok.Builder;
 import lombok.Getter;

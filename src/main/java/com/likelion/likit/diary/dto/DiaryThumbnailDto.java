@@ -2,13 +2,10 @@ package com.likelion.likit.diary.dto;
 
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
-import com.likelion.likit.file.entity.File;
+import com.likelion.likit.diary.entity.DiaryFile;
 import com.likelion.likit.member.entity.Member;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -45,8 +42,8 @@ public class DiaryThumbnailDto {
     private class ThumbnailDto{
         private Long id;
 
-        public ThumbnailDto(File file) {
-            this.id = file.getId();
+        public ThumbnailDto(DiaryFile diaryFile) {
+            this.id = diaryFile.getId();
         }
     }
 

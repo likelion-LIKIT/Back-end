@@ -4,15 +4,22 @@ import com.likelion.likit.diary.dto.DiaryReqDto;
 import com.likelion.likit.diary.dto.DiaryResDto;
 import com.likelion.likit.diary.dto.DiaryThumbnailDto;
 import com.likelion.likit.diary.entity.Diary;
+import com.likelion.likit.file.FileDto;
 import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -102,6 +109,25 @@ public class DiaryController {
         Member member = memberController.findMemberByToken(accessToken);
 
         return new ResponseEntity<>(diaryService.checkLike(id, member), HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @Operation(summary = "diary 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 diary 파일 출력")
+    @GetMapping(
+            value = "diary/file/{id}",
+            produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.APPLICATION_PDF_VALUE}
+    )
+    public ResponseEntity<byte[]> getDiaryFile(@PathVariable Long id) throws IOException {
+        FileDto fileDto = diaryService.findDiaryByFileId(id);
+        String absolutePath
+                = new File("").getAbsolutePath() + File.separator + File.separator;
+        String path = fileDto.getFilePath();
+
+        InputStream imageStream = new FileInputStream(absolutePath + path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
 }
