@@ -70,4 +70,38 @@ public class NoticeService {
     }
 
 
+    public List<Notice> viewNotice() {
+        return jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+    }
+
+    public List<NoticeThumbnailDto> viewNoticeWithThumbnail() {
+        List<Notice> diaries = jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+        List<NoticeThumbnailDto> noticeThumbnailDtos = new ArrayList<>();
+        for (Notice notice : diaries) {
+            System.out.println(notice.getThumbnail().getId());
+            noticeThumbnailDtos.add(new NoticeThumbnailDto(notice));
+        }
+        return noticeThumbnailDtos;
+    }
+
+    public List<NoticeResDto> view() {
+        List<Notice> diaries = jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+        List<NoticeResDto> noticeResDto = new ArrayList<>();
+        for (Notice notice : diaries) {
+            System.out.println(notice.getThumbnail().getId());
+            noticeResDto.add(new NoticeResDto(notice));
+        }
+        return noticeResDto;
+    }
+
+    @Transactional
+    public NoticeResDto viewOne(Long id) {
+        Notice notice = jpaNoticeRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        int visit = notice.getVisit();
+        jpaNoticeRepository.updateVisit(visit + 1, id);
+        Notice newNotice = jpaNoticeRepository.getReferenceById(id);
+        return new NoticeResDto(newNotice);
+    }
+
+
 }

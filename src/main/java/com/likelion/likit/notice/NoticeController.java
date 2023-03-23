@@ -40,4 +40,29 @@ public class NoticeController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+
+    @Operation(summary = "notice 글 조회", description = "Notice 글 조희")
+    @GetMapping("/notice")
+    public List<Notice> viewNotice() {
+        return noticeService.viewNotice();
+    }
+
+    @Operation(summary = "thumbnail과 함께 notice 글 조회", description = "Notice 글 조희")
+    @GetMapping("/notice/thumbnail")
+    public List<NoticeThumbnailDto> viewNoticeWithThumbnail() {
+        return noticeService.viewNoticeWithThumbnail();
+    }
+
+    @Operation(summary = "notice 글 정보 모두 조회", description = "Notice 글 조희")
+    @GetMapping("/notice/all")
+    public List<NoticeResDto> viewAll() {
+        return noticeService.view();
+    }
+
+    @Operation(summary = "notice id 글 정보 모두 조회", description = "해당 Notice 글 조희 + 조회수 증가")
+    @GetMapping("/notice/{id}")
+    public NoticeResDto viewone(@PathVariable Long id) {
+        return noticeService.viewOne(id);
+    }
+
 }
