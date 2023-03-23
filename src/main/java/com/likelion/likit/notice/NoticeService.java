@@ -190,6 +190,33 @@ public class NoticeService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public FileDto findNoticeByFileId(Long id) {
+        NoticeFile noticeFile = jpaNoticeFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
+
+        FileDto fileDto = FileDto.builder()
+                .fileName(noticeFile.getFileName())
+                .filePath(noticeFile.getFilePath())
+                .fileSize(noticeFile.getFileSize())
+                .isThumbnail(noticeFile.isThumbnail())
+                .build();
+
+        return fileDto;
+    }
+
+    public ResponseEntity<Object> download(Long fileID) throws IOException {
+        NoticeFile noticeFile = jpaNoticeFileRepository.findById(fileID).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
+        String filePath = noticeFile.getFilePath();
+        try {
+            Resource resource = noticeFileHandler.download(filePath);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(noticeFile.getFileName(), StandardCharsets.UTF_8).build());
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
+
 
 
 }

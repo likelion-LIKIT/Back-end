@@ -112,4 +112,29 @@ public class NoticeController {
         return new ResponseEntity<>(noticeService.checkLike(id, member), HttpStatus.OK);
     }
 
+    @CrossOrigin
+    @Operation(summary = "notice 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 notice 파일 출력")
+    @GetMapping(
+            value = "notice/file/{id}",
+            produces = {MediaType.ALL_VALUE}
+    )
+    public ResponseEntity<byte[]> getNoticeFile(@PathVariable Long id) throws IOException {
+        FileDto fileDto = noticeService.findNoticeByFileId(id);
+        String absolutePath
+                = new File("").getAbsolutePath() + File.separator + File.separator;
+        String path = fileDto.getFilePath();
+
+        InputStream imageStream = new FileInputStream(absolutePath + path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+    }
+
+    @Operation(summary = "notice 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
+    @GetMapping("notice/download/{id}")
+    public ResponseEntity<Object> downloadNoticeFile(@PathVariable Long id) throws IOException {
+        return noticeService.download(id);
+    }
+
 }
