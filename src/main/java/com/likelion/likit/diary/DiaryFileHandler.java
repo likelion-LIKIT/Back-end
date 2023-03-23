@@ -27,18 +27,9 @@ public class DiaryFileHandler {
 
         if (!CollectionUtils.isEmpty(multipartFiles)) {
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            String savePath = uploadPath + java.io.File.separator + java.io.File.separator;
-            String path = "file" + java.io.File.separator + "diary" + java.io.File.separator +currentDate;
+            String path =  "file" + java.io.File.separator + "diary" + java.io.File.separator +currentDate;
             java.io.File file = new java.io.File(path);
-
-            if (!file.exists()) {
-                boolean madeFile = file.mkdirs();
-
-                if (!madeFile) {
-                    System.out.printf("%s is wrong", path);
-                }
-
-            }
+            file.mkdirs();
 
             for (MultipartFile multipartFile : multipartFiles) {
                 String fileExtension;
@@ -75,6 +66,7 @@ public class DiaryFileHandler {
                 diaryFiles.add(diaryFile1);
 
                 String saveName = uploadPath + File.separator + path + File.separator + saveFileName;
+                System.out.println(saveName);
                 Path savedPath = Paths.get(saveName);
                 multipartFile.transferTo(savedPath);
 
