@@ -1,7 +1,6 @@
 package com.likelion.likit.diary.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.likelion.likit.file.entity.File;
 import com.likelion.likit.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,11 +42,11 @@ public class Diary {
 
     @JsonIgnore
     @OneToMany(mappedBy = "diary", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
-    private List<File> files = new ArrayList<>();
+    private List<DiaryFile> diaryFiles = new ArrayList<>();
 
     @JsonIgnore
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
-    private File thumbnail;
+    private DiaryFile thumbnail;
 
     @Enumerated(value = EnumType.STRING)
     private Category category;
@@ -71,13 +70,13 @@ public class Diary {
     private String updateDate;
 
     @Builder
-    public Diary(String title, String description, String location, Member member, List<File> files, File thumbnail, Category category,
+    public Diary(String title, String description, String location, Member member, List<DiaryFile> diaryFiles, DiaryFile thumbnail, Category category,
                  List<LikeMembers> likeMembers, Integer likes, int visit, String date) {
         this.title = title;
         this.description = description;
         this.location = location;
         this.member = member;
-        this.files = files;
+        this.diaryFiles = diaryFiles;
         this.thumbnail = thumbnail;
         this.category = category;
         this.likeMembers = likeMembers;

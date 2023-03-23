@@ -3,7 +3,7 @@ package com.likelion.likit.diary.dto;
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
 import com.likelion.likit.diary.entity.LikeMembers;
-import com.likelion.likit.file.entity.File;
+import com.likelion.likit.diary.entity.DiaryFile;
 import com.likelion.likit.member.entity.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +35,7 @@ public class DiaryResDto {
         this.description = diary.getDescription();
         this.location = diary.getLocation();
         this.member = new WriterDto(diary.getMember());
-        this.fileId = makeFileList(diary.getFiles());
+        this.fileId = makeFileList(diary.getDiaryFiles());
         this.thumbnailId = new FileDto(diary.getThumbnail()).getId();
         this.category = diary.getCategory();
         List<LikeMembers> likeMembers = diary.getLikeMembers();
@@ -49,10 +49,10 @@ public class DiaryResDto {
         this.updateDate = diary.getUpdateDate();
     }
 
-    public List<Long> makeFileList(List<File> fileList) {
+    public List<Long> makeFileList(List<DiaryFile> diaryFileList) {
         List<Long> fileIdList = new ArrayList<>();
-        for (File file : fileList) {
-            FileDto newFile = new FileDto(file);
+        for (DiaryFile diaryFile : diaryFileList) {
+            FileDto newFile = new FileDto(diaryFile);
             if (!newFile.isThumbnail) {
                 fileIdList.add(newFile.getId());
             }
@@ -65,9 +65,9 @@ public class DiaryResDto {
         private Long id;
         private boolean isThumbnail;
 
-        public FileDto(File file) {
-            this.id = file.getId();
-            this.isThumbnail = file.isThumbnail();
+        public FileDto(DiaryFile diaryFile) {
+            this.id = diaryFile.getId();
+            this.isThumbnail = diaryFile.isThumbnail();
         }
     }
 
