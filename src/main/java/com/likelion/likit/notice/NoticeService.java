@@ -103,5 +103,52 @@ public class NoticeService {
         return new NoticeResDto(newNotice);
     }
 
+    @Transactional
+    public void update(Long id, Member member, NoticeReqDto noticeReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
+        Notice notice = jpaNoticeRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (notice.getMember() == member) {
+            if (noticeReqDto != null) {
+                String title = noticeReqDto.getTitle();
+                String description = noticeReqDto.getDescription();
+                String location = noticeReqDto.getLocation();
+                Category category = noticeReqDto.getCategory();
+                String date = noticeReqDto.getDate();
+                String updateDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+                if (title != null) {
+                    jpaNoticeRepository.updateTitle(title, id);
+                }
+                if (description != null) {
+                    jpaNoticeRepository.updateDescription(description, id);
+                }
+                if (location != null) {
+                    jpaNoticeRepository.updateLocation(location, id);
+                }
+                if (category != null) {
+                    jpaNoticeRepository.updateCategory(category, id);
+                }
+                if (date != null) {
+                    jpaNoticeRepository.updateDate(date, id);
+                }
+                jpaNoticeRepository.updateUpdateDate(updateDateTime, id);
+            }
+            if (thumbnail != null) {
+                NoticeFile baseThumbnail = jpaNoticeFileRepository.findByNoticeIdAndIsThumbnail(id, true);
+                jpaNoticeFileRepository.delete(baseThumbnail);
+                List<NoticeFile> thumbnailNoticeFile = noticeFileHandler.parseFile(thumbnail, true);
+                fileId(thumbnailNoticeFile, notice);
+            }
+            if (files != null) {
+                List<NoticeFile> baseNoticeFileList = jpaNoticeFileRepository.findAllByNoticeIdAndIsThumbnail(id, false);
+                List<NoticeFile> noticeFileList = noticeFileHandler.parseFile(files, false);
+                for (NoticeFile noticeFile : baseNoticeFileList) {
+                    jpaNoticeFileRepository.delete(noticeFile);
+                }
+                fileId(noticeFileList, notice);
+            }
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
 
 }

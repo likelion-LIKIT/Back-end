@@ -65,4 +65,21 @@ public class NoticeController {
         return noticeService.viewOne(id);
     }
 
+    @Operation(summary = "notice 수정", description = "성공하면 아래의 내용이 수정됨" + "\n\n" +
+            "title"+ "\n\n" +
+            "description"+ "\n\n" +
+            "location"+ "\n\n" +
+            "category"+ "\n\n" +
+            "date")
+    @PatchMapping("/notice/{id}")
+    public ResponseEntity<String> updateNotice(@RequestHeader(name = "accessToken") String accessToken,
+                                               @PathVariable Long id,
+                                               @RequestPart(value = "noticeReqDto", required = false) NoticeReqDto noticeReqDto,
+                                               @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
+                                               @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        noticeService.update(id, member, noticeReqDto, thumbnail, files);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
 }
