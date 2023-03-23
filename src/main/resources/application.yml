@@ -7,6 +7,8 @@ spring:
     multipart:
       maxFileSize: 10MB
       maxRequestSize: 20MB
+      enabled: true
+      location : /Users/kathylee/Desktop/
 
 upload:
   path: /Users/kathylee/Desktop/

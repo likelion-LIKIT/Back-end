@@ -2,6 +2,7 @@ package com.likelion.likit.diary;
 
 import com.likelion.likit.file.FileDto;
 import com.likelion.likit.diary.entity.DiaryFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -15,13 +16,16 @@ import java.util.List;
 @Component
 public class DiaryFileHandler {
 
+    @Value("${upload.path}")
+    private String uploadPath;
+
     public List<DiaryFile> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail) throws Exception {
         List<DiaryFile> diaryFiles = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(multipartFiles)) {
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            String absolutePath = new java.io.File("").getAbsolutePath() + java.io.File.separator + java.io.File.separator;
-            String path = "file" + java.io.File.separator + currentDate;
+            String savePath = uploadPath + java.io.File.separator + java.io.File.separator;
+            String path = "file" + java.io.File.separator + "diary" + java.io.File.separator +currentDate;
             java.io.File file = new java.io.File(path);
 
             if (!file.exists()) {
@@ -67,7 +71,7 @@ public class DiaryFileHandler {
 
                 diaryFiles.add(diaryFile1);
 
-                file = new java.io.File(absolutePath + path + java.io.File.separator + saveFileName);
+                file = new java.io.File(uploadPath + path + java.io.File.separator + saveFileName);
                 multipartFile.transferTo(file);
 
                 file.setWritable(true);
