@@ -91,4 +91,25 @@ public class NoticeController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @Operation(summary = "notice 좋아요 등록 및 취소", description =  "해당 글 좋아요 누른 적이 없으면 해당 글에 좋아요 등록 및 좋아요 수 Up &"+ "\n\n" +
+            " 해당 글에 좋아요 누른 적이 있으면 해당 글에 좋아요 취소 및 좋아요 수 Down")
+    @PostMapping("notice/{id}/like")
+    public ResponseEntity<String> likeNotice(@RequestHeader(name = "accessToken") String accessToken,
+                                             @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        String result = noticeService.like(id, member) + " Success";
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Operation(summary = "notice 좋아요 등록 여부 확인", description = "해당 USER가 좋아요를 눌렀는지 확인 여부"+"\n\n"+
+            "해당 USER가 좋아요 리스트에 존재하면 \"LIKED\"" +"\n\n"+
+            "해당 USER가 좋아요 리스트에 존재하지 않으면 \"UNLIKED\""+"\n\n")
+    @GetMapping("notice/{id}/check")
+    public ResponseEntity<String> checkLiked(@RequestHeader(name = "accessToken") String accessToken,
+                                             @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+
+        return new ResponseEntity<>(noticeService.checkLike(id, member), HttpStatus.OK);
+    }
+
 }

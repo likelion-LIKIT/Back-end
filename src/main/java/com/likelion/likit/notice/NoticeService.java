@@ -160,5 +160,36 @@ public class NoticeService {
         }
     }
 
+    @Transactional
+    public String like(Long id, Member member) {
+        String result = "LIKE";
+        Notice notice = jpaNoticeRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        Optional<NoticeLikeMembers> liked = jpaNoticeLikeRepository.findByNoticeAndMember(notice, member);
+        if (!liked.isPresent()) {
+            NoticeLikeMembers likeMember = NoticeLikeMembers.builder()
+                    .notice(notice)
+                    .member(member)
+                    .build();
+            jpaNoticeLikeRepository.save(likeMember);
+        } else {
+            jpaNoticeLikeRepository.delete(liked.get());
+            result = "UNLIKE";
+        }
+        Integer count = jpaNoticeLikeRepository.findByNoticeId(id).size();
+        jpaNoticeRepository.updateLikes(count, id);
+        return result;
+    }
+
+    public String checkLike(Long id, Member member) {
+        Notice notice = jpaNoticeRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        Optional<NoticeLikeMembers> liked = jpaNoticeLikeRepository.findByNoticeAndMember(notice, member);
+        if (liked.isPresent()) {
+            return "LIKED";
+        } else {
+            return "UNLIKED";
+        }
+    }
+
+
 
 }
