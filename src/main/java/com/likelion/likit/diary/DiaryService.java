@@ -16,11 +16,18 @@ import com.likelion.likit.file.FileDto;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -91,7 +98,7 @@ public class DiaryService {
     public DiaryResDto viewOne(Long id) {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         int visit = diary.getVisit();
-        jpaDiaryRepository.updateVisit(visit+1, id);
+        jpaDiaryRepository.updateVisit(visit + 1, id);
         Diary newDiary = jpaDiaryRepository.getReferenceById(id);
         return new DiaryResDto(newDiary);
     }
@@ -158,7 +165,7 @@ public class DiaryService {
         String result = "LIKE";
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         Optional<LikeMembers> liked = jpaDiaryLikeRepository.findByDiaryAndMember(diary, member);
-        if (!liked.isPresent()){
+        if (!liked.isPresent()) {
             LikeMembers likeMember = LikeMembers.builder()
                     .diary(diary)
                     .member(member)
@@ -176,7 +183,7 @@ public class DiaryService {
     public String checkLike(Long id, Member member) {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         Optional<LikeMembers> liked = jpaDiaryLikeRepository.findByDiaryAndMember(diary, member);
-        if (liked.isPresent()){
+        if (liked.isPresent()) {
             return "LIKED";
         } else {
             return "UNLIKED";
@@ -195,5 +202,18 @@ public class DiaryService {
                 .build();
 
         return fileDto;
+    }
+
+    public ResponseEntity<Object> download(Long fileID) throws IOException {
+        DiaryFile diaryFile = jpaDiaryFileRepository.findById(fileID).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
+        String filePath = diaryFile.getFilePath();
+        try {
+            Resource resource = diaryFileHandler.download(filePath);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(diaryFile.getFileName(), StandardCharsets.UTF_8).build());
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
     }
 }
