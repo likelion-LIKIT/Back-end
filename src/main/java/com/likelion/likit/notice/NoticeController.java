@@ -82,4 +82,13 @@ public class NoticeController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @Operation(summary = "notice 삭제", description = "해당 id 값의 notice 삭제")
+    @DeleteMapping("notice/{id}")
+    public ResponseEntity<String> deleteNotice(@RequestHeader(name = "accessToken") String accessToken,
+                                               @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        noticeService.delete(id, member);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
 }

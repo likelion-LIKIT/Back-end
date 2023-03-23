@@ -150,5 +150,15 @@ public class NoticeService {
         }
     }
 
+    @Transactional
+    public void delete(Long id, Member member) {
+        Notice notice = jpaNoticeRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (member == notice.getMember()) {
+            jpaNoticeRepository.delete(notice);
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
 
 }
