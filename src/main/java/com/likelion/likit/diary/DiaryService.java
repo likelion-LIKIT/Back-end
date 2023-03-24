@@ -16,6 +16,7 @@ import com.likelion.likit.file.FileDto;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ContentDisposition;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +41,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class DiaryService {
+
+    @Value("${part4.upload.path}")
+    private String uploadPath;
 
     private final DiaryFileHandler diaryFileHandler;
     private final JpaDiaryRepository jpaDiaryRepository;
@@ -215,5 +220,28 @@ public class DiaryService {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         }
+    }
+
+    public String findDiaryByDiaryId(Long id, String fileName) throws IOException {
+        DiaryFile diaryInfo = null;
+        List<DiaryFile> diaryFile = jpaDiaryFileRepository.findAllByDiaryId(id);
+        System.out.println(diaryFile);
+        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        for (DiaryFile diaryFile1 : diaryFile) {
+            String a = diaryFile1.getFileName();
+            String enCompare = URLEncoder.encode(a, StandardCharsets.UTF_8);
+            System.out.println(enCompare + " " + enFileName);
+            if (enCompare.equals(enFileName)) {
+                diaryInfo = diaryFile1;
+            }
+        }
+        FileDto fileDto = FileDto.builder()
+                .fileName(diaryInfo.getFileName())
+                .filePath(diaryInfo.getFilePath())
+                .fileSize(diaryInfo.getFileSize())
+                .isThumbnail(diaryInfo.isThumbnail())
+                .build();
+
+        return uploadPath + fileDto.getFilePath();
     }
 }
