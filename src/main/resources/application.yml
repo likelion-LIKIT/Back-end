@@ -8,11 +8,11 @@ spring:
       maxFileSize: 10MB
       maxRequestSize: 20MB
       enabled: true
-      location : /Users/kathylee/Desktop/
+      location : C:\Users\SYH\Desktop\
 
 part4:
   upload:
-    path: /Users/kathylee/Desktop/
+    path: C:\Users\SYH\Desktop\
 
 springdoc:
   version: '@project.version@'
