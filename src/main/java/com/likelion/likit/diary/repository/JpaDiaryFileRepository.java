@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface JpaDiaryFileRepository extends JpaRepository<DiaryFile, Long> {
     List<DiaryFile> findAllByDiaryIdAndIsThumbnail(Long diaryId, boolean isThumbnail);
+    List<DiaryFile> findAllByDiaryId(Long diaryId);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DiaryFile c SET c.diary = :diary WHERE c.id = :id ")
