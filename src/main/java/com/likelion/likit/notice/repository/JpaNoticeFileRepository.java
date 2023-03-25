@@ -16,4 +16,7 @@ public interface JpaNoticeFileRepository extends JpaRepository<NoticeFile, Long>
     void updateNotice(Notice notice, Long id);
 
     NoticeFile findByNoticeIdAndIsThumbnail(Long noticeId, boolean isThumbnail);
+
+    List<NoticeFile> findAllByNoticeId(Long id);
+
 }

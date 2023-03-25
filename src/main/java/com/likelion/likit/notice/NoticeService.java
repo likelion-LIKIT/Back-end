@@ -16,6 +16,7 @@ import com.likelion.likit.file.FileDto;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ContentDisposition;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +41,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class NoticeService {
+
+    @Value("${part4.upload.path}")
+    private String uploadPath;
 
     private final NoticeFileHandler noticeFileHandler;
     private final JpaNoticeRepository jpaNoticeRepository;
@@ -191,17 +196,27 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public FileDto findNoticeByFileId(Long id) {
+    public String findFileByFileId(Long id) {
         NoticeFile noticeFile = jpaNoticeFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
 
-        FileDto fileDto = FileDto.builder()
-                .fileName(noticeFile.getFileName())
-                .filePath(noticeFile.getFilePath())
-                .fileSize(noticeFile.getFileSize())
-                .isThumbnail(noticeFile.isThumbnail())
-                .build();
 
-        return fileDto;
+        return uploadPath + noticeFile.getFilePath();
+    }
+
+    @Transactional(readOnly = true)
+    public String findFileByFileName(Long id, String fileName) {
+        NoticeFile noticeInfo = null;
+        List<NoticeFile> noticeFile = jpaNoticeFileRepository.findAllByNoticeId(id);
+        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        for (NoticeFile noticeFile1 : noticeFile) {
+            String findFile = noticeFile1.getFileName();
+            String enCompare = URLEncoder.encode(findFile, StandardCharsets.UTF_8);
+            if (enCompare.equals(enFileName)) {
+                noticeInfo = noticeFile1;
+            }
+        }
+
+        return uploadPath + noticeInfo.getFilePath();
     }
 
     public ResponseEntity<Object> download(Long fileID) throws IOException {

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
@@ -118,17 +119,27 @@ public class NoticeController {
             value = "notice/file/{id}",
             produces = {MediaType.ALL_VALUE}
     )
-    public ResponseEntity<byte[]> getNoticeFile(@PathVariable Long id) throws IOException {
-        FileDto fileDto = noticeService.findNoticeByFileId(id);
-        String absolutePath
-                = new File("").getAbsolutePath() + File.separator + File.separator;
-        String path = fileDto.getFilePath();
+    public String getNoticeFile(@PathVariable Long id) throws IOException {
+        String path = "file://" + noticeService.findFileByFileId(id);
 
-        InputStream imageStream = new FileInputStream(absolutePath + path);
-        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
-        imageStream.close();
+        return path;
+    }
 
-        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+    @CrossOrigin
+    @Operation(summary = "notice id와 파일 명으로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 notice 파일 url 출력")
+    @GetMapping(
+            value = "notice/{id}/file",
+            produces = {MediaType.ALL_VALUE}
+    )
+    public String getnoticeFileByName(@PathVariable Long id,
+                                     @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
+
+//        Path path = Paths.get(diaryService.findDiaryByDiaryId(id, fileName));
+//        String file = path;
+//        RedirectView redirectView = new RedirectView();
+//        redirectView.setUrl("file://"+diaryService.findDiaryByDiaryId(id, fileName));
+//        System.out.println(redirectView);
+        return "file://"+ noticeService.findFileByFileName(id, fileName);
     }
 
     @Operation(summary = "notice 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
