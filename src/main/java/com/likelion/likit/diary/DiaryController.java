@@ -4,22 +4,17 @@ import com.likelion.likit.diary.dto.DiaryReqDto;
 import com.likelion.likit.diary.dto.DiaryResDto;
 import com.likelion.likit.diary.dto.DiaryThumbnailDto;
 import com.likelion.likit.diary.entity.Diary;
-import com.likelion.likit.file.FileDto;
 import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -113,31 +108,32 @@ public class DiaryController {
     }
 
     @CrossOrigin
-    @Operation(summary = "diary 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 diary 파일 출력")
+    @Operation(summary = "파일 id로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 파일 출력")
     @GetMapping(
             value = "diary/file/{id}",
             produces = {MediaType.ALL_VALUE}
     )
-    public ResponseEntity<byte[]> getDiaryFile(@PathVariable Long id) throws IOException {
-        FileDto fileDto = diaryService.findDiaryByFileId(id);
-        String absolutePath
-                = new File("").getAbsolutePath() + File.separator + File.separator;
-        String path = fileDto.getFilePath();
-
-        InputStream imageStream = new FileInputStream(absolutePath + path);
-        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
-        imageStream.close();
-
-        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+    public String getDiaryFile(@PathVariable Long id) throws IOException {
+//        FileDto fileDto = diaryService.findFileByFileId(id);
+//        String absolutePath
+//                = new File("").getAbsolutePath() + File.separator + File.separator;
+//        String path = fileDto.getFilePath();
+//
+//        InputStream imageStream = new FileInputStream(absolutePath + path);
+//        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+//        imageStream.close();
+//
+//        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+        return "file://"+diaryService.findFileByFileId(id);
     }
 
     @CrossOrigin
-    @Operation(summary = "diary 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 diary 파일 url 출력")
+    @Operation(summary = "diary id와 파일 명으로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 diary 파일 url 출력")
     @GetMapping(
             value = "diary/{id}/file",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getDiaryFile(@PathVariable Long id,
+    public String getDiaryFileByName(@PathVariable Long id,
                                @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
 
 //        Path path = Paths.get(diaryService.findDiaryByDiaryId(id, fileName));
@@ -145,7 +141,7 @@ public class DiaryController {
 //        RedirectView redirectView = new RedirectView();
 //        redirectView.setUrl("file://"+diaryService.findDiaryByDiaryId(id, fileName));
 //        System.out.println(redirectView);
-        return "file://"+diaryService.findDiaryByDiaryId(id, fileName);
+        return "file://"+diaryService.findFileByDiaryId(id, fileName);
     }
 
     @Operation(summary = "diary 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")

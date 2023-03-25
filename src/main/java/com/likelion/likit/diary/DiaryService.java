@@ -196,17 +196,17 @@ public class DiaryService {
     }
 
     @Transactional(readOnly = true)
-    public FileDto findDiaryByFileId(Long id) {
+    public String findFileByFileId(Long id) {
         DiaryFile diaryFile = jpaDiaryFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
 
-        FileDto fileDto = FileDto.builder()
-                .fileName(diaryFile.getFileName())
-                .filePath(diaryFile.getFilePath())
-                .fileSize(diaryFile.getFileSize())
-                .isThumbnail(diaryFile.isThumbnail())
-                .build();
+//        FileDto fileDto = FileDto.builder()
+//                .fileName(diaryFile.getFileName())
+//                .filePath(diaryFile.getFilePath())
+//                .fileSize(diaryFile.getFileSize())
+//                .isThumbnail(diaryFile.isThumbnail())
+//                .build();
 
-        return fileDto;
+        return uploadPath + diaryFile.getFilePath();
     }
 
     public ResponseEntity<Object> download(Long fileID) throws IOException {
@@ -222,7 +222,7 @@ public class DiaryService {
         }
     }
 
-    public String findDiaryByDiaryId(Long id, String fileName) throws IOException {
+    public String findFileByDiaryId(Long id, String fileName) throws IOException {
         DiaryFile diaryInfo = null;
         List<DiaryFile> diaryFile = jpaDiaryFileRepository.findAllByDiaryId(id);
         System.out.println(diaryFile);
@@ -235,13 +235,13 @@ public class DiaryService {
                 diaryInfo = diaryFile1;
             }
         }
-        FileDto fileDto = FileDto.builder()
-                .fileName(diaryInfo.getFileName())
-                .filePath(diaryInfo.getFilePath())
-                .fileSize(diaryInfo.getFileSize())
-                .isThumbnail(diaryInfo.isThumbnail())
-                .build();
+//        FileDto fileDto = FileDto.builder()
+//                .fileName(diaryInfo.getFileName())
+//                .filePath(diaryInfo.getFilePath())
+//                .fileSize(diaryInfo.getFileSize())
+//                .isThumbnail(diaryInfo.isThumbnail())
+//                .build();
 
-        return uploadPath + fileDto.getFilePath();
+        return uploadPath + diaryInfo.getFilePath();
     }
 }
