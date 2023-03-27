@@ -3,16 +3,7 @@
 spring:
   profiles:
     active: dev
-  servlet:
-    multipart:
-      maxFileSize: 10MB
-      maxRequestSize: 20MB
-      enabled: true
-      location : /Users/kathylee/Desktop/
 
-part4:
-  upload:
-    path: /Users/kathylee/Desktop/
 
 springdoc:
   version: '@project.version@'

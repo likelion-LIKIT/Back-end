@@ -147,4 +147,9 @@ public class MemberService  {
     public void delete(Member member) {
         jpaMemberRepository.delete(member);
     }
+
+    public MemberResDto findMember(String studentId) {
+        Member member = jpaMemberRepository.findByStudentId(studentId).orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));
+        return new MemberResDto(member);
+    }
 }
