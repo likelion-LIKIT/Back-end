@@ -69,10 +69,10 @@ public class MemberController{
     }
 
     @Operation(summary = "회원정보 조회", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
-    @GetMapping("/member")
-    public ResponseEntity<MemberResDto> viewUserInfo(@RequestHeader String accessToken) {
-        Member member = findMemberByToken(accessToken);
-        return ResponseEntity.ok(new MemberResDto(member));
+    @GetMapping("/member/{studentId}")
+    public ResponseEntity<MemberResDto> viewUserInfo(@PathVariable String studentId) {
+
+        return ResponseEntity.ok(memberService.findMember(studentId));
     }
 
     @Operation(summary = "회원 정보 수정", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
