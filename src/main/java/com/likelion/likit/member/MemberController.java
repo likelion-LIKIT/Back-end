@@ -12,6 +12,7 @@ import com.likelion.likit.token.TokenDto;
 import com.likelion.likit.token.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +28,7 @@ public class MemberController{
 
     @Operation(summary = "회원가입", description = "성공하면 memberID 반환")
     @PostMapping("/member/new")
-    public void createMember(@RequestBody MemberReqDto memberReqDto) {
+    public ResponseEntity<String> createMember(@RequestBody MemberReqDto memberReqDto) {
 
         if (jpaMemberRepository.findByStudentId(memberReqDto.getStudentId()).isPresent()) {
             throw new CustomException(ExceptionEnum.STUDENTIDISPRESENT);
@@ -38,11 +39,11 @@ public class MemberController{
 
         String encodePassword = passwordEncoder.encode(memberReqDto.getPassword());
         Member member = memberReqDto.toEntity(encodePassword);
-        memberService.join(member);
         MemberDetail memberDetail = memberReqDto.detailEntity(member);
-        memberService.saveDetail(memberDetail);
+        memberService.createMember(member, memberDetail);
         Token token = new Token(member);
-        tokenService.join(token);
+        tokenService.createToken(token);
+        return new ResponseEntity("Success", HttpStatus.OK);
     }
 
     @Operation(summary = "로그인", description = "성공하면 Token 반환")

@@ -43,6 +43,10 @@ public class TokenService {
         return jpaTokenRepository.findByMember(member);
     }
 
+    public void createToken(Token token) {
+        join(token);
+    }
+
     @Transactional
     public void join(Token token) {
         jpaTokenRepository.save(token);

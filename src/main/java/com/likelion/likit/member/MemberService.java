@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,12 +32,19 @@ public class MemberService  {
     private final JpaTechStackRepository jpaTechStackRepository;
     private final JpaMemberTechStackRepository jpaMemberTechStackRepository;
 
-    @Transactional
+
     public Member findByStudentId(String studentId) {
         Member member = jpaMemberRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));
         return member;
     }
+
+
+    public void createMember(Member member, MemberDetail memberDetail) {
+        join(member);
+        saveDetail(memberDetail);
+    }
+
     @Transactional
     public void join(Member member) {
         jpaMemberRepository.save(member);
@@ -47,6 +53,10 @@ public class MemberService  {
     @Transactional
     public void saveDetail(MemberDetail memberDetail) {
         jpaMemberDetailRepository.save(memberDetail);
+    }
+
+    private MemberResDto findMemberInfo(Member member) {
+        return new MemberResDto(member);
     }
 
 
@@ -73,13 +83,13 @@ public class MemberService  {
         String updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
         Long memberId = member.getId();
         MemberDetail memberDetails = jpaMemberDetailRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));;
+                .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));
         Long id = memberDetails.getId();
 
         List<String> tech = techUpdateDto.getTech();
         if (tech != null) {
             List<MemberTechStack> memberTechStacks = jpaMemberTechStackRepository.findAllByMemberDetail(memberDetails);
-            if (!memberTechStacks.isEmpty()){
+            if (!memberTechStacks.isEmpty()) {
                 List<Long> ids = new ArrayList<>();
                 for (MemberTechStack memberTechStack : memberTechStacks) {
                     ids.add(memberTechStack.getId());
@@ -87,7 +97,7 @@ public class MemberService  {
                 jpaMemberTechStackRepository.deleteAllByIdInQuery(ids);
             }
             List<MemberTechStack> newMemberTechStacks = new ArrayList<>();
-            for(String ts : tech) {
+            for (String ts : tech) {
                 TechStack techStack = jpaTechStackRepository.findByTechStack(ts);
                 MemberTechStack memberTechStack
                         = MemberTechStack.builder()
@@ -140,7 +150,6 @@ public class MemberService  {
 
         return memberResDto;
     }
-
 
 
     @Transactional
