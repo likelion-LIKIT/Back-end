@@ -19,13 +19,14 @@ public class DiaryResDto {
     private String description;
     private String location;
     private WriterDto member;
-    private List<Long> fileId;
+    private List<FileDto> file;
     private Long thumbnailId;
     private Category category;
     private List<Long> likeMemeber = new ArrayList<>();
     private Integer likes;
     private int visit;
     private String date;
+    private boolean temp;
     private String creationDate;
     private String updateDate;
 
@@ -35,7 +36,7 @@ public class DiaryResDto {
         this.description = diary.getDescription();
         this.location = diary.getLocation();
         this.member = new WriterDto(diary.getMember());
-        this.fileId = makeFileList(diary.getDiaryFiles());
+        this.file = makeFileList(diary.getDiaryFiles());
         this.thumbnailId = new FileDto(diary.getThumbnail()).getId();
         this.category = diary.getCategory();
         List<LikeMembers> likeMembers = diary.getLikeMembers();
@@ -45,28 +46,33 @@ public class DiaryResDto {
         this.likes = diary.getLikes();
         this.visit = diary.getVisit();
         this.date = diary.getDate();
+        this.temp = diary.isTemp();
         this.creationDate = diary.getCreationDate();
         this.updateDate = diary.getUpdateDate();
     }
 
-    public List<Long> makeFileList(List<DiaryFile> diaryFileList) {
-        List<Long> fileIdList = new ArrayList<>();
+    public List<FileDto> makeFileList(List<DiaryFile> diaryFileList) {
+        List<FileDto> fileList = new ArrayList<>();
         for (DiaryFile diaryFile : diaryFileList) {
             FileDto newFile = new FileDto(diaryFile);
             if (!newFile.isThumbnail) {
-                fileIdList.add(newFile.getId());
+                fileList.add(newFile);
             }
         }
-        return fileIdList;
+        return fileList;
     }
 
     @Getter
     private class FileDto {
         private Long id;
+        private String fileName;
+        private String filePath;
         private boolean isThumbnail;
 
         public FileDto(DiaryFile diaryFile) {
             this.id = diaryFile.getId();
+            this.fileName = diaryFile.getFileName();
+            this.filePath = diaryFile.getFilePath();
             this.isThumbnail = diaryFile.isThumbnail();
         }
     }

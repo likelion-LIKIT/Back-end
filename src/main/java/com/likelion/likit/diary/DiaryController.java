@@ -42,10 +42,10 @@ public class DiaryController {
         return diaryService.viewDiary();
     }
 
-    @Operation(summary = "thumbnail과 함께 diary 글 조회", description = "Diary 글 조희")
+    @Operation(summary = "thumbnail과 함께 diary 글 조회", description = "Diary 글 조희 (temp = false 이면 게시된 게시물, true이면 임시저장 글")
     @GetMapping("/diary/thumbnail")
-    public List<DiaryThumbnailDto> viewDiaryWithThubnail() {
-        return diaryService.viewDiaryWithThumbnail();
+    public List<DiaryThumbnailDto> viewDiaryWithThubnail(@RequestParam(name = "temp", defaultValue = "false", required = false) boolean temp ) {
+        return diaryService.viewDiaryWithThumbnail(temp);
     }
 
     @Operation(summary = "diary 글 정보 모두 조회", description = "Diary 글 조희")
