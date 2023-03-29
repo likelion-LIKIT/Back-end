@@ -34,13 +34,13 @@ public class NoticeFileHandler {
         this.jpaNoticeFileRepository = jpaNoticeFileRepository;
     }
 
-    public List<NoticeFile> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail) throws Exception {
+    public List<NoticeFile> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail, String studentID) throws Exception {
         List<NoticeFile> noticeFiles = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(multipartFiles)) {
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-            String path = "file" + java.io.File.separator + "notice" + java.io.File.separator + currentDate;
+            String path = "file" + java.io.File.separator + studentID + java.io.File.separator + "notice" + java.io.File.separator + currentDate;
             String allPath = uploadPath + path;
             java.io.File file = new java.io.File(allPath);
             file.mkdirs();
