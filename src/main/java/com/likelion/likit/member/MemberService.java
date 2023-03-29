@@ -39,12 +39,6 @@ public class MemberService  {
         return member;
     }
 
-
-    public void createMember(Member member, MemberDetail memberDetail) {
-        join(member);
-        saveDetail(memberDetail);
-    }
-
     @Transactional
     public void join(Member member) {
         jpaMemberRepository.save(member);

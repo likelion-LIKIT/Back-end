@@ -39,10 +39,11 @@ public class MemberController{
 
         String encodePassword = passwordEncoder.encode(memberReqDto.getPassword());
         Member member = memberReqDto.toEntity(encodePassword);
+        memberService.join(member);
         MemberDetail memberDetail = memberReqDto.detailEntity(member);
-        memberService.createMember(member, memberDetail);
+        memberService.saveDetail(memberDetail);
         Token token = new Token(member);
-        tokenService.createToken(token);
+        tokenService.join(token);
         return new ResponseEntity("Success", HttpStatus.OK);
     }
 
@@ -69,7 +70,7 @@ public class MemberController{
         }
     }
 
-    @Operation(summary = "회원정보 조회", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
+    @Operation(summary = "회원정보 조회", description = "성공하면 회원 정보 반환")
     @GetMapping("/member/{studentId}")
     public ResponseEntity<MemberResDto> viewUserInfo(@PathVariable String studentId) {
 
