@@ -2,13 +2,18 @@ package com.likelion.likit.notice.repository;
 
 import com.likelion.likit.notice.entity.Category;
 import com.likelion.likit.notice.entity.Notice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface JpaNoticeRepository extends JpaRepository<Notice, Long> {
+    List<Notice> findByTempTrue(Sort sort);
+    List<Notice> findByTempFalse(Sort sort);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Notice c SET c.title = :title WHERE c.id = :id ")
@@ -41,4 +46,8 @@ public interface JpaNoticeRepository extends JpaRepository<Notice, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Notice c SET c.updateDate = :updateDate WHERE c.id = :id ")
     void updateUpdateDate(String updateDate, Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Notice c SET c.temp = :temp WHERE c.id = :id ")
+    void updateTemp(boolean temp, Long id);
 }

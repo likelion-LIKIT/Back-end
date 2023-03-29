@@ -5,14 +5,15 @@ import com.likelion.likit.notice.dto.NoticeResDto;
 import com.likelion.likit.notice.dto.NoticeThumbnailDto;
 import com.likelion.likit.notice.entity.Category;
 import com.likelion.likit.notice.entity.Notice;
-import com.likelion.likit.notice.entity.NoticeLikeMembers;
 import com.likelion.likit.notice.entity.NoticeFile;
+import com.likelion.likit.notice.entity.NoticeLikeMembers;
 import com.likelion.likit.notice.repository.JpaNoticeRepository;
 import com.likelion.likit.notice.repository.JpaNoticeLikeRepository;
 import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.notice.repository.JpaNoticeFileRepository;
-import com.likelion.likit.file.FileDto;
+import com.likelion.likit.file.FileService;
+import com.likelion.likit.file.entity.ImageFile;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class NoticeService {
     private String uploadPath;
 
     private final NoticeFileHandler noticeFileHandler;
+    private final FileService fileService;
     private final JpaNoticeRepository jpaNoticeRepository;
     private final JpaNoticeFileRepository jpaNoticeFileRepository;
     private final JpaNoticeLikeRepository jpaNoticeLikeRepository;
@@ -66,8 +68,8 @@ public class NoticeService {
 
     @Transactional
     public void create(Member member, NoticeReqDto noticeReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
-        List<NoticeFile> noticeFileList = noticeFileHandler.parseFile(files, false);
-        List<NoticeFile> thumbnailNoticeFile = noticeFileHandler.parseFile(thumbnail, true);
+        List<NoticeFile> noticeFileList = noticeFileHandler.parseFile(files, false, member.getStudentId());
+        List<NoticeFile> thumbnailNoticeFile = noticeFileHandler.parseFile(thumbnail, true, member.getStudentId());
         Long id = saveNotice(member, thumbnailNoticeFile.get(0), noticeReqDto);
         Notice notice = jpaNoticeRepository.getReferenceById(id);
         fileId(noticeFileList, notice);
@@ -79,21 +81,23 @@ public class NoticeService {
         return jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
     }
 
-    public List<NoticeThumbnailDto> viewNoticeWithThumbnail() {
-        List<Notice> diaries = jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+    public List<NoticeThumbnailDto> viewNoticeWithThumbnail(boolean temp) {
+        List<Notice> notices = jpaNoticeRepository.findByTempFalse(Sort.by(Sort.Direction.ASC, "date"));
+        if (temp) {
+            notices = jpaNoticeRepository.findByTempTrue(Sort.by(Sort.Direction.ASC, "date"));
+        }
+
         List<NoticeThumbnailDto> noticeThumbnailDtos = new ArrayList<>();
-        for (Notice notice : diaries) {
-            System.out.println(notice.getThumbnail().getId());
+        for (Notice notice : notices) {
             noticeThumbnailDtos.add(new NoticeThumbnailDto(notice));
         }
         return noticeThumbnailDtos;
     }
 
     public List<NoticeResDto> view() {
-        List<Notice> diaries = jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+        List<Notice> notices = jpaNoticeRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
         List<NoticeResDto> noticeResDto = new ArrayList<>();
-        for (Notice notice : diaries) {
-            System.out.println(notice.getThumbnail().getId());
+        for (Notice notice : notices) {
             noticeResDto.add(new NoticeResDto(notice));
         }
         return noticeResDto;
@@ -118,6 +122,7 @@ public class NoticeService {
                 String location = noticeReqDto.getLocation();
                 Category category = noticeReqDto.getCategory();
                 String date = noticeReqDto.getDate();
+                boolean temp = noticeReqDto.isTemp();
                 String updateDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
                 if (title != null) {
                     jpaNoticeRepository.updateTitle(title, id);
@@ -134,17 +139,20 @@ public class NoticeService {
                 if (date != null) {
                     jpaNoticeRepository.updateDate(date, id);
                 }
+                if (!temp) {
+                    jpaNoticeRepository.updateTemp(false, id);
+                }
                 jpaNoticeRepository.updateUpdateDate(updateDateTime, id);
             }
             if (thumbnail != null) {
                 NoticeFile baseThumbnail = jpaNoticeFileRepository.findByNoticeIdAndIsThumbnail(id, true);
                 jpaNoticeFileRepository.delete(baseThumbnail);
-                List<NoticeFile> thumbnailNoticeFile = noticeFileHandler.parseFile(thumbnail, true);
+                List<NoticeFile> thumbnailNoticeFile = noticeFileHandler.parseFile(thumbnail, true, member.getStudentId());
                 fileId(thumbnailNoticeFile, notice);
             }
             if (files != null) {
                 List<NoticeFile> baseNoticeFileList = jpaNoticeFileRepository.findAllByNoticeIdAndIsThumbnail(id, false);
-                List<NoticeFile> noticeFileList = noticeFileHandler.parseFile(files, false);
+                List<NoticeFile> noticeFileList = noticeFileHandler.parseFile(files, false, member.getStudentId());
                 for (NoticeFile noticeFile : baseNoticeFileList) {
                     jpaNoticeFileRepository.delete(noticeFile);
                 }
@@ -203,22 +211,6 @@ public class NoticeService {
         return uploadPath + noticeFile.getFilePath();
     }
 
-    @Transactional(readOnly = true)
-    public String findFileByFileName(Long id, String fileName) {
-        NoticeFile noticeInfo = null;
-        List<NoticeFile> noticeFile = jpaNoticeFileRepository.findAllByNoticeId(id);
-        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
-        for (NoticeFile noticeFile1 : noticeFile) {
-            String findFile = noticeFile1.getFileName();
-            String enCompare = URLEncoder.encode(findFile, StandardCharsets.UTF_8);
-            if (enCompare.equals(enFileName)) {
-                noticeInfo = noticeFile1;
-            }
-        }
-
-        return uploadPath + noticeInfo.getFilePath();
-    }
-
     public ResponseEntity<Object> download(Long fileID) throws IOException {
         NoticeFile noticeFile = jpaNoticeFileRepository.findById(fileID).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
         String filePath = noticeFile.getFilePath();
@@ -232,6 +224,23 @@ public class NoticeService {
         }
     }
 
+    public String findFileByNoticeId(Long id, String fileName) throws IOException {
+        NoticeFile noticeInfo = null;
+        List<NoticeFile> noticeFile = jpaNoticeFileRepository.findAllByNoticeId(id);
+        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        for (NoticeFile noticeFile1 : noticeFile) {
+            String a = noticeFile1.getFileName();
+            String enCompare = URLEncoder.encode(a, StandardCharsets.UTF_8);
+            if (enCompare.equals(enFileName)) {
+                noticeInfo = noticeFile1;
+            }
+        }
+        return uploadPath + noticeInfo.getFilePath();
+    }
 
-
+    @Transactional
+    public String createImageUrl(List<MultipartFile> imageFile, Member member) throws Exception {
+        ImageFile editorImage = fileService.parseImage(imageFile, false, member.getStudentId(), "notice");
+        return uploadPath + editorImage.getFilePath();
+    }
 }
