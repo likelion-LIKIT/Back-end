@@ -16,6 +16,7 @@ public class DiaryReqDto {
     private String location;
     private Category category;
     private String date;
+    private boolean temp;
 
     @Builder
     public DiaryReqDto(Diary diary) {
@@ -24,6 +25,7 @@ public class DiaryReqDto {
         this.location = diary.getLocation();
         this.category = diary.getCategory();
         this.date = diary.getDate();
+        this.temp = diary.isTemp();
     }
 
     public Diary toEntity(Member member, DiaryFile thumbnail) {
@@ -35,6 +37,7 @@ public class DiaryReqDto {
                 .location(location)
                 .category(category)
                 .date(date)
+                .temp(temp)
                 .build();
     }
 }

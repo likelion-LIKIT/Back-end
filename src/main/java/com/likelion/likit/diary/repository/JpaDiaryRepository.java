@@ -2,13 +2,18 @@ package com.likelion.likit.diary.repository;
 
 import com.likelion.likit.diary.entity.Category;
 import com.likelion.likit.diary.entity.Diary;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface JpaDiaryRepository extends JpaRepository<Diary, Long> {
+    List<Diary> findByTempTrue(Sort sort);
+    List<Diary> findByTempFalse(Sort sort);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Diary c SET c.title = :title WHERE c.id = :id ")
@@ -41,4 +46,8 @@ public interface JpaDiaryRepository extends JpaRepository<Diary, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Diary c SET c.updateDate = :updateDate WHERE c.id = :id ")
     void updateUpdateDate(String updateDate, Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Diary c SET c.temp = :temp WHERE c.id = :id ")
+    void updateTemp(boolean temp, Long id);
 }

@@ -81,11 +81,15 @@ public class DiaryService {
         return jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
     }
 
-    public List<DiaryThumbnailDto> viewDiaryWithThumbnail() {
-        List<Diary> diaries = jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+    public List<DiaryThumbnailDto> viewDiaryWithThumbnail(boolean temp) {
+        List<Diary> diaries = jpaDiaryRepository.findByTempFalse(Sort.by(Sort.Direction.ASC, "date"));
+        if (temp) {
+            diaries = jpaDiaryRepository.findByTempTrue(Sort.by(Sort.Direction.ASC, "date"));
+        }
+
         List<DiaryThumbnailDto> diaryThumbnailDtos = new ArrayList<>();
         for (Diary diary : diaries) {
-            System.out.println(diary.getThumbnail().getId());
+//            System.out.println(diary.getThumbnail().getId());
             diaryThumbnailDtos.add(new DiaryThumbnailDto(diary));
         }
         return diaryThumbnailDtos;
@@ -95,7 +99,7 @@ public class DiaryService {
         List<Diary> diaries = jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
         List<DiaryResDto> diaryResDto = new ArrayList<>();
         for (Diary diary : diaries) {
-            System.out.println(diary.getThumbnail().getId());
+//            System.out.println(diary.getThumbnail().getId());
             diaryResDto.add(new DiaryResDto(diary));
         }
         return diaryResDto;
@@ -120,6 +124,7 @@ public class DiaryService {
                 String location = diaryReqDto.getLocation();
                 Category category = diaryReqDto.getCategory();
                 String date = diaryReqDto.getDate();
+                boolean temp = diaryReqDto.isTemp();
                 String updateDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
                 if (title != null) {
                     jpaDiaryRepository.updateTitle(title, id);
@@ -135,6 +140,9 @@ public class DiaryService {
                 }
                 if (date != null) {
                     jpaDiaryRepository.updateDate(date, id);
+                }
+                if (!temp) {
+                    jpaDiaryRepository.updateTemp(false, id);
                 }
                 jpaDiaryRepository.updateUpdateDate(updateDateTime, id);
             }
@@ -227,12 +235,12 @@ public class DiaryService {
     public String findFileByDiaryId(Long id, String fileName) throws IOException {
         DiaryFile diaryInfo = null;
         List<DiaryFile> diaryFile = jpaDiaryFileRepository.findAllByDiaryId(id);
-        System.out.println(diaryFile);
+//        System.out.println(diaryFile);
         String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
         for (DiaryFile diaryFile1 : diaryFile) {
             String a = diaryFile1.getFileName();
             String enCompare = URLEncoder.encode(a, StandardCharsets.UTF_8);
-            System.out.println(enCompare + " " + enFileName);
+//            System.out.println(enCompare + " " + enFileName);
             if (enCompare.equals(enFileName)) {
                 diaryInfo = diaryFile1;
             }
