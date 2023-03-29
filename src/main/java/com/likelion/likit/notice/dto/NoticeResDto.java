@@ -2,8 +2,8 @@ package com.likelion.likit.notice.dto;
 
 import com.likelion.likit.notice.entity.Category;
 import com.likelion.likit.notice.entity.Notice;
-import com.likelion.likit.notice.entity.NoticeLikeMembers;
 import com.likelion.likit.notice.entity.NoticeFile;
+import com.likelion.likit.notice.entity.NoticeLikeMembers;
 import com.likelion.likit.member.entity.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,13 +19,14 @@ public class NoticeResDto {
     private String description;
     private String location;
     private WriterDto member;
-    private List<Long> fileId;
+    private List<FileDto> file;
     private Long thumbnailId;
     private Category category;
     private List<Long> likeMemeber = new ArrayList<>();
     private Integer likes;
     private int visit;
     private String date;
+    private boolean temp;
     private String creationDate;
     private String updateDate;
 
@@ -35,7 +36,7 @@ public class NoticeResDto {
         this.description = notice.getDescription();
         this.location = notice.getLocation();
         this.member = new WriterDto(notice.getMember());
-        this.fileId = makeFileList(notice.getNoticeFiles());
+        this.file = makeFileList(notice.getNoticeFiles());
         this.thumbnailId = new FileDto(notice.getThumbnail()).getId();
         this.category = notice.getCategory();
         List<NoticeLikeMembers> noticeLikeMembers = notice.getNoticeLikeMembers();
@@ -45,28 +46,33 @@ public class NoticeResDto {
         this.likes = notice.getLikes();
         this.visit = notice.getVisit();
         this.date = notice.getDate();
+        this.temp = notice.isTemp();
         this.creationDate = notice.getCreationDate();
         this.updateDate = notice.getUpdateDate();
     }
 
-    public List<Long> makeFileList(List<NoticeFile> noticeFileList) {
-        List<Long> fileIdList = new ArrayList<>();
+    public List<FileDto> makeFileList(List<NoticeFile> noticeFileList) {
+        List<FileDto> fileList = new ArrayList<>();
         for (NoticeFile noticeFile : noticeFileList) {
             FileDto newFile = new FileDto(noticeFile);
             if (!newFile.isThumbnail) {
-                fileIdList.add(newFile.getId());
+                fileList.add(newFile);
             }
         }
-        return fileIdList;
+        return fileList;
     }
 
     @Getter
     private class FileDto {
         private Long id;
+        private String fileName;
+        private String filePath;
         private boolean isThumbnail;
 
         public FileDto(NoticeFile noticeFile) {
             this.id = noticeFile.getId();
+            this.fileName = noticeFile.getFileName();
+            this.filePath = noticeFile.getFilePath();
             this.isThumbnail = noticeFile.isThumbnail();
         }
     }

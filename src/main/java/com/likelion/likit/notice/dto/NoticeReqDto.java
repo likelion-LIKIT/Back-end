@@ -16,6 +16,7 @@ public class NoticeReqDto {
     private String location;
     private Category category;
     private String date;
+    private boolean temp;
 
     @Builder
     public NoticeReqDto(Notice notice) {
@@ -24,6 +25,7 @@ public class NoticeReqDto {
         this.location = notice.getLocation();
         this.category = notice.getCategory();
         this.date = notice.getDate();
+        this.temp = notice.isTemp();
     }
 
     public Notice toEntity(Member member, NoticeFile thumbnail) {
@@ -35,6 +37,7 @@ public class NoticeReqDto {
                 .location(location)
                 .category(category)
                 .date(date)
+                .temp(temp)
                 .build();
     }
 }

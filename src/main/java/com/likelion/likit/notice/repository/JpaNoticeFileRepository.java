@@ -12,13 +12,11 @@ import java.util.List;
 @Repository
 public interface JpaNoticeFileRepository extends JpaRepository<NoticeFile, Long> {
     List<NoticeFile> findAllByNoticeIdAndIsThumbnail(Long noticeId, boolean isThumbnail);
+    List<NoticeFile> findAllByNoticeId(Long noticeId);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE NoticeFile c SET c.notice = :notice WHERE c.id = :id ")
     void updateNotice(Notice notice, Long id);
 
     NoticeFile findByNoticeIdAndIsThumbnail(Long noticeId, boolean isThumbnail);
-
-    List<NoticeFile> findAllByNoticeId(Long id);
-
 }

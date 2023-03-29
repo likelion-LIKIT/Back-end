@@ -4,22 +4,17 @@ import com.likelion.likit.notice.dto.NoticeReqDto;
 import com.likelion.likit.notice.dto.NoticeResDto;
 import com.likelion.likit.notice.dto.NoticeThumbnailDto;
 import com.likelion.likit.notice.entity.Notice;
-import com.likelion.likit.file.FileDto;
 import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -41,17 +36,16 @@ public class NoticeController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
-
     @Operation(summary = "notice 글 조회", description = "Notice 글 조희")
     @GetMapping("/notice")
     public List<Notice> viewNotice() {
         return noticeService.viewNotice();
     }
 
-    @Operation(summary = "thumbnail과 함께 notice 글 조회", description = "Notice 글 조희")
+    @Operation(summary = "thumbnail과 함께 notice 글 조회", description = "Notice 글 조희 (temp = false 이면 게시된 게시물, true이면 임시저장 글")
     @GetMapping("/notice/thumbnail")
-    public List<NoticeThumbnailDto> viewNoticeWithThumbnail() {
-        return noticeService.viewNoticeWithThumbnail();
+    public List<NoticeThumbnailDto> viewNoticeWithThubnail(@RequestParam(name = "temp", defaultValue = "false", required = false) boolean temp ) {
+        return noticeService.viewNoticeWithThumbnail(temp);
     }
 
     @Operation(summary = "notice 글 정보 모두 조회", description = "Notice 글 조희")
@@ -74,10 +68,10 @@ public class NoticeController {
             "date")
     @PatchMapping("/notice/{id}")
     public ResponseEntity<String> updateNotice(@RequestHeader(name = "accessToken") String accessToken,
-                                               @PathVariable Long id,
-                                               @RequestPart(value = "noticeReqDto", required = false) NoticeReqDto noticeReqDto,
-                                               @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
-                                               @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+                                              @PathVariable Long id,
+                                              @RequestPart(value = "noticeReqDto", required = false) NoticeReqDto noticeReqDto,
+                                              @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
+                                              @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         noticeService.update(id, member, noticeReqDto, thumbnail, files);
         return new ResponseEntity<>("Success", HttpStatus.OK);
@@ -86,7 +80,7 @@ public class NoticeController {
     @Operation(summary = "notice 삭제", description = "해당 id 값의 notice 삭제")
     @DeleteMapping("notice/{id}")
     public ResponseEntity<String> deleteNotice(@RequestHeader(name = "accessToken") String accessToken,
-                                               @PathVariable Long id) {
+                                              @PathVariable Long id) {
         Member member = memberController.findMemberByToken(accessToken);
         noticeService.delete(id, member);
         return new ResponseEntity<>("Success", HttpStatus.OK);
@@ -96,7 +90,7 @@ public class NoticeController {
             " 해당 글에 좋아요 누른 적이 있으면 해당 글에 좋아요 취소 및 좋아요 수 Down")
     @PostMapping("notice/{id}/like")
     public ResponseEntity<String> likeNotice(@RequestHeader(name = "accessToken") String accessToken,
-                                             @PathVariable Long id) {
+                                            @PathVariable Long id) {
         Member member = memberController.findMemberByToken(accessToken);
         String result = noticeService.like(id, member) + " Success";
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -114,15 +108,13 @@ public class NoticeController {
     }
 
     @CrossOrigin
-    @Operation(summary = "notice 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 notice 파일 출력")
+    @Operation(summary = "파일 id로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 파일 출력")
     @GetMapping(
             value = "notice/file/{id}",
             produces = {MediaType.ALL_VALUE}
     )
     public String getNoticeFile(@PathVariable Long id) throws IOException {
-        String path = "file://" + noticeService.findFileByFileId(id);
-
-        return path;
+        return "file://"+ noticeService.findFileByFileId(id);
     }
 
     @CrossOrigin
@@ -131,15 +123,10 @@ public class NoticeController {
             value = "notice/{id}/file",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getnoticeFileByName(@PathVariable Long id,
-                                     @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
+    public String getNoticeFileByName(@PathVariable Long id,
+                               @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
 
-//        Path path = Paths.get(diaryService.findDiaryByDiaryId(id, fileName));
-//        String file = path;
-//        RedirectView redirectView = new RedirectView();
-//        redirectView.setUrl("file://"+diaryService.findDiaryByDiaryId(id, fileName));
-//        System.out.println(redirectView);
-        return "file://"+ noticeService.findFileByFileName(id, fileName);
+        return "file://"+ noticeService.findFileByNoticeId(id, fileName);
     }
 
     @Operation(summary = "notice 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
@@ -148,4 +135,12 @@ public class NoticeController {
         return noticeService.download(id);
     }
 
+    @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + notice 파일 url 출력")
+    @PostMapping(value = "notice/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+                              @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        String path = "file://"+ noticeService.createImageUrl(imageFile, member);
+        return new ResponseEntity<>(path, HttpStatus.OK);
+    }
 }

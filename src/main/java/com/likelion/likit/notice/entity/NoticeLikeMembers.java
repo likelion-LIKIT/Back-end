@@ -21,7 +21,7 @@ public class NoticeLikeMembers {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "notice_id")
+    @JoinColumn(name = "diary_id")
     private Notice notice;
 
     @Builder

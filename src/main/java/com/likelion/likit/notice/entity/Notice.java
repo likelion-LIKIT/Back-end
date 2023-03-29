@@ -63,6 +63,8 @@ public class Notice {
     @Column(name = "date")
     private String date;
 
+    private boolean temp;
+
     @Column(name = "creation_date") @CreatedDate
     private String creationDate;
 
@@ -71,7 +73,7 @@ public class Notice {
 
     @Builder
     public Notice(String title, String description, String location, Member member, List<NoticeFile> noticeFiles, NoticeFile thumbnail, Category category,
-                  List<NoticeLikeMembers> noticeLikeMembers, Integer likes, int visit, String date) {
+                  List<NoticeLikeMembers> noticeLikeMembers, Integer likes, int visit, String date, boolean temp) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -83,6 +85,7 @@ public class Notice {
         this.likes = likes;
         this.visit = visit;
         this.date = String.format(date, DateTimeFormatter.ofPattern("yyy.MM.dd"));
+        this.temp = temp;
         this.creationDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
         this.updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
     }
