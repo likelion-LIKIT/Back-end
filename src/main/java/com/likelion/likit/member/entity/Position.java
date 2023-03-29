@@ -1,17 +1,34 @@
 package com.likelion.likit.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
-public enum Position {
-    REPRESENTATIVE("REPRESENTATIVE"),
-    DEPUTY_REPRESENTATIVE("DEPUTY_REPRESENTATIVE"),
-    TRACK_LEADER("TRACK_LEADER"),
-    MANAGEMENT("MANAGEMENT"),
-    BABY_LION("BABY_LION");
-    private String position;
+@Entity
+@NoArgsConstructor
+public class Position {
 
-    Position(String position) {
-        this.position = position;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Enumerated(value = EnumType.STRING)
+    private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "memberdetail_id")
+    @JsonIgnore
+    private MemberDetail memberDetail;
+
+    @Builder
+    public Position(Category category, MemberDetail memberDetail) {
+        this.category = category;
+        this.memberDetail = memberDetail;
     }
 }

@@ -4,12 +4,10 @@ import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.member.dto.MemberUpdateReqDto;
 import com.likelion.likit.member.dto.MemberResDto;
+import com.likelion.likit.member.dto.PositionUpdateDto;
 import com.likelion.likit.member.dto.TechUpdateDto;
 import com.likelion.likit.member.entity.*;
-import com.likelion.likit.member.repository.JpaMemberDetailRepository;
-import com.likelion.likit.member.repository.JpaMemberRepository;
-import com.likelion.likit.member.repository.JpaMemberTechStackRepository;
-import com.likelion.likit.member.repository.JpaTechStackRepository;
+import com.likelion.likit.member.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +29,7 @@ public class MemberService  {
     private final JpaMemberDetailRepository jpaMemberDetailRepository;
     private final JpaTechStackRepository jpaTechStackRepository;
     private final JpaMemberTechStackRepository jpaMemberTechStackRepository;
+    private final JpaPositionRepository jpaPositionRepository;
 
 
     public Member findByStudentId(String studentId) {
@@ -60,7 +59,7 @@ public class MemberService  {
     }
 
     @Transactional
-    public MemberResDto update(Member member, MemberUpdateReqDto memberUpdateReqDto, TechUpdateDto techUpdateDto) {
+    public void update(Member member, MemberUpdateReqDto memberUpdateReqDto, TechUpdateDto techUpdateDto, PositionUpdateDto positionUpdateDto) {
 
         String updateStudentName = memberUpdateReqDto.getStudentName();
         String updatePhoneNumber = memberUpdateReqDto.getPhoneNumber();
@@ -71,7 +70,6 @@ public class MemberService  {
         String updateLikelionEmail = memberUpdateReqDto.getLikelionEmail();
         String updateEmail = memberUpdateReqDto.getEmail();
         Integer updateTerm = memberUpdateReqDto.getTerm();
-        Position updatePosition = memberUpdateReqDto.getPosition();
         String updateBirth = memberUpdateReqDto.getBirth();
         String updateGithub = memberUpdateReqDto.getGithub();
         String updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
@@ -103,6 +101,29 @@ public class MemberService  {
             jpaMemberTechStackRepository.saveAllAndFlush(newMemberTechStacks);
         }
 
+        List<Category> positions = positionUpdateDto.getPosition();
+        if (positions != null) {
+            List<Position> memberPositions = jpaPositionRepository.findAllByMemberDetail(memberDetails);
+            if (!memberPositions.isEmpty()) {
+                List<Long> ids = new ArrayList<>();
+                for (Position memberPosition : memberPositions) {
+                    ids.add(memberPosition.getId());
+                }
+                jpaPositionRepository.deleteAllByIdInQuery(ids);
+            }
+            List<Position> newMemberPositions = new ArrayList<>();
+            for (Category category : positions) {
+                Position memberPosition
+                        = Position.builder()
+                        .memberDetail(memberDetails)
+                        .category(category)
+                        .build();
+                newMemberPositions.add(memberPosition);
+            }
+
+            jpaPositionRepository.saveAllAndFlush(newMemberPositions);
+        }
+
         if (updateStudentName != null) {
             jpaMemberDetailRepository.updateStudentName(updateStudentName, id);
         }
@@ -130,9 +151,6 @@ public class MemberService  {
         if (updateTerm != null) {
             jpaMemberDetailRepository.updateTerm(updateTerm, id);
         }
-        if (updatePosition != null) {
-            jpaMemberDetailRepository.updatePosition(updatePosition, id);
-        }
         if (updateBirth != null) {
             jpaMemberDetailRepository.updateBirth(updateBirth, id);
         }
@@ -140,9 +158,6 @@ public class MemberService  {
             jpaMemberDetailRepository.updateGithub(updateGithub, id);
         }
         jpaMemberDetailRepository.updateDate(updateDate, id);
-        MemberResDto memberResDto = new MemberResDto(member);
-
-        return memberResDto;
     }
 
 

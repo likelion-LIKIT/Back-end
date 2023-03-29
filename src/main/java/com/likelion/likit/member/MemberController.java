@@ -79,12 +79,14 @@ public class MemberController{
 
     @Operation(summary = "회원 정보 수정", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
     @PatchMapping("/member")
-    public ResponseEntity<MemberResDto> updateUserInfo(@RequestHeader String accessToken,
+    public ResponseEntity<String> updateUserInfo(@RequestHeader String accessToken,
                                                        @RequestPart(value = "update", required = false) MemberUpdateReqDto memberUpdateReqDto,
-                                                       @RequestPart(value = "tech", required = false) TechUpdateDto techUpdateDto) {
+                                                       @RequestPart(value = "tech", required = false) TechUpdateDto techUpdateDto,
+                                                       @RequestPart(value = "position", required = false) PositionUpdateDto positionUpdateDto) {
 
         Member member = findMemberByToken(accessToken);
-        return ResponseEntity.ok(memberService.update(member, memberUpdateReqDto, techUpdateDto));
+        memberService.update(member, memberUpdateReqDto, techUpdateDto, positionUpdateDto);
+        return ResponseEntity.ok("Success");
     }
 
     @Operation(summary = "회원 정보 삭제", description = "Header에 accessToken 필수!")
