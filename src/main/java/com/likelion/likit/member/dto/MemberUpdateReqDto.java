@@ -17,7 +17,6 @@ public class MemberUpdateReqDto {
     private String likelionEmail;
     private String email;
     private Integer term;
-    private Position position;
     private String birth;
     private String github;
 
@@ -32,7 +31,6 @@ public class MemberUpdateReqDto {
         this.likelionEmail = memberDetail.getLikelionEmail();
         this.email = memberDetail.getEmail();
         this.term = memberDetail.getTerm();
-        this.position = memberDetail.getPosition();
         this.birth = memberDetail.getBirth();
         this.github = memberDetail.getGithub();
     }

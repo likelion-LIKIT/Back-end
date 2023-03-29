@@ -4,6 +4,8 @@ import com.likelion.likit.member.entity.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 public class MemberReqDto {
@@ -16,7 +18,6 @@ public class MemberReqDto {
     Track track;
     String email;
     Integer term;
-    Position position;
     Boolean isActive;
     Boolean isStaff;
     Boolean isSuperuser;
@@ -41,8 +42,8 @@ public class MemberReqDto {
                 .track(track)
                 .email(email)
                 .term(term)
-                .position(position)
                 .build();
     }
+
 
 }

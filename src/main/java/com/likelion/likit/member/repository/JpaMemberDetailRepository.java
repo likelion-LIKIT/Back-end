@@ -52,10 +52,6 @@ public interface JpaMemberDetailRepository extends JpaRepository<MemberDetail,Lo
     void updateTerm(Integer term, Long id);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE MemberDetail c SET c.position = :position WHERE c.id = :id ")
-    void updatePosition(Position position, Long id);
-
-    @Modifying(clearAutomatically = true)
     @Query("UPDATE MemberDetail c SET c.birth = :birth WHERE c.id = :id ")
     void updateBirth(String birth, Long id);
 
