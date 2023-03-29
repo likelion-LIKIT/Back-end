@@ -4,11 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum Category {
-    ALL("ALL"),
-    PM_DESIGN("PM_DESIGN"),
-    FRONT_END("FRONT_END"),
-    BACK_END("BACK_END"),
-    HACKATHON("HACKATHON");
+    해커톤("해커톤"),
+    스터디("스터디"),
+    동아리("동아리"),
+    중앙("중앙");
 
     private String category;
 
