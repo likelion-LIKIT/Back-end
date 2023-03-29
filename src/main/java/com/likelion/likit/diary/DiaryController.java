@@ -149,4 +149,13 @@ public class DiaryController {
     public ResponseEntity<Object> downloadDiaryFile(@PathVariable Long id) throws IOException {
         return diaryService.download(id);
     }
+
+    @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + diary 파일 url 출력")
+    @PostMapping(value = "diary/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+                              @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        String path = "file://"+diaryService.createImageUrl(imageFile, member);
+        return new ResponseEntity<>(path, HttpStatus.OK);
+    }
 }

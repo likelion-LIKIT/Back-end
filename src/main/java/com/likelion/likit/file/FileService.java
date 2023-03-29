@@ -1,46 +1,44 @@
-package com.likelion.likit.diary;
+package com.likelion.likit.file;
 
-import com.likelion.likit.diary.repository.JpaDiaryFileRepository;
-import com.likelion.likit.file.FileDto;
-import com.likelion.likit.diary.entity.DiaryFile;
+import com.likelion.likit.exception.CustomException;
+import com.likelion.likit.exception.ExceptionEnum;
+import com.likelion.likit.file.entity.ImageFile;
+import com.likelion.likit.file.repository.JpaImageFileRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
-@Component
-
-public class DiaryFileHandler {
-
-    private final JpaDiaryFileRepository jpaDiaryFileRepository;
+@Slf4j
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class FileService {
 
     @Value("${part4.upload.path}")
     private String uploadPath;
 
-    public DiaryFileHandler(JpaDiaryFileRepository jpaDiaryFileRepository) {
-        this.jpaDiaryFileRepository = jpaDiaryFileRepository;
-    }
+    private final JpaImageFileRepository jpaImageFileRepository;
 
-    public List<DiaryFile> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail, String studentID) throws Exception {
-        List<DiaryFile> diaryFiles = new ArrayList<>();
+    @Transactional
+    public ImageFile parseImage(List<MultipartFile> multipartFiles, boolean isThumbnail, String studentID, String fileType) throws Exception {
+        ImageFile imageFile = null;
 
         if (!CollectionUtils.isEmpty(multipartFiles)) {
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-            String path = "file" + java.io.File.separator + studentID + java.io.File.separator + "diary" + java.io.File.separator + currentDate;
+            String path = "image" + java.io.File.separator + studentID + java.io.File.separator + fileType + java.io.File.separator + currentDate;
             String allPath = uploadPath + path;
             java.io.File file = new java.io.File(allPath);
             file.mkdirs();
@@ -67,14 +65,14 @@ public class DiaryFileHandler {
                         .build();
 
 
-                DiaryFile diaryFile1 = new DiaryFile(
+                imageFile = new ImageFile(
                         fileDto.getFileName(),
                         fileDto.getFilePath(),
-                        fileDto.getFileSize(),
-                        fileDto.isThumbnail()
+                        fileDto.getFileSize()
                 );
 
-                diaryFiles.add(diaryFile1);
+                jpaImageFileRepository.save(imageFile);
+
 
                 String saveName = uploadPath + File.separator + path + File.separator + saveFileName;
 
@@ -85,13 +83,9 @@ public class DiaryFileHandler {
                 file.setReadable(true);
             }
         }
-        return diaryFiles;
-    }
-
-
-    public Resource download(String filePath) throws IOException {
-        String file = uploadPath + filePath;
-        Path path = Paths.get(file);
-        return new InputStreamResource(Files.newInputStream(path));
+        if (imageFile == null) {
+            throw new CustomException(ExceptionEnum.FILENOTEXIST);
+        }
+       return imageFile;
     }
 }

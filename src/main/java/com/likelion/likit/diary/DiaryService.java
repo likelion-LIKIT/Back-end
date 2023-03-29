@@ -12,7 +12,8 @@ import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.diary.entity.DiaryFile;
 import com.likelion.likit.diary.repository.JpaDiaryFileRepository;
-import com.likelion.likit.file.FileDto;
+import com.likelion.likit.file.FileService;
+import com.likelion.likit.file.entity.ImageFile;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class DiaryService {
     private String uploadPath;
 
     private final DiaryFileHandler diaryFileHandler;
+    private final FileService fileService;
     private final JpaDiaryRepository jpaDiaryRepository;
     private final JpaDiaryFileRepository jpaDiaryFileRepository;
     private final JpaDiaryLikeRepository jpaDiaryLikeRepository;
@@ -66,8 +68,8 @@ public class DiaryService {
 
     @Transactional
     public void create(Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
-        List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false);
-        List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true);
+        List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false, member.getStudentId());
+        List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true, member.getStudentId());
         Long id = saveDiary(member, thumbnailDiaryFile.get(0), diaryReqDto);
         Diary diary = jpaDiaryRepository.getReferenceById(id);
         fileId(diaryFileList, diary);
@@ -139,12 +141,12 @@ public class DiaryService {
             if (thumbnail != null) {
                 DiaryFile baseThumbnail = jpaDiaryFileRepository.findByDiaryIdAndIsThumbnail(id, true);
                 jpaDiaryFileRepository.delete(baseThumbnail);
-                List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true);
+                List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true, member.getStudentId());
                 fileId(thumbnailDiaryFile, diary);
             }
             if (files != null) {
                 List<DiaryFile> baseDiaryFileList = jpaDiaryFileRepository.findAllByDiaryIdAndIsThumbnail(id, false);
-                List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false);
+                List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false, member.getStudentId());
                 for (DiaryFile diaryFile : baseDiaryFileList) {
                     jpaDiaryFileRepository.delete(diaryFile);
                 }
@@ -243,5 +245,11 @@ public class DiaryService {
 //                .build();
 
         return uploadPath + diaryInfo.getFilePath();
+    }
+
+    @Transactional
+    public String createImageUrl(List<MultipartFile> imageFile, Member member) throws Exception {
+        ImageFile editorImage = fileService.parseImage(imageFile, false, member.getStudentId(), "diary");
+        return uploadPath + editorImage.getFilePath();
     }
 }
