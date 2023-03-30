@@ -52,5 +52,30 @@ public class HomeworkController {
         return homeworkService.viewOne(id);
     }
 
+    @Operation(summary = "homework 수정", description = "성공하면 아래의 내용이 수정됨" + "\n\n" +
+            "title"+ "\n\n" +
+            "description"+ "\n\n" +
+            "location"+ "\n\n" +
+            "category"+ "\n\n" +
+            "date")
+    @PatchMapping("/homework/{id}")
+    public ResponseEntity<String> updateHomework(@RequestHeader(name = "accessToken") String accessToken,
+                                                 @PathVariable Long id,
+                                                 @RequestPart(value = "homeworkReqDto", required = false) HomeworkReqDto homeworkReqDto,
+                                                 @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        homeworkService.update(id, member, homeworkReqDto, files);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
+    @Operation(summary = "homework 삭제", description = "해당 id 값의 homework 삭제")
+    @DeleteMapping("homework/{id}")
+    public ResponseEntity<String> deleteHomework(@RequestHeader(name = "accessToken") String accessToken,
+                                                 @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        homeworkService.delete(id, member);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
 
 }

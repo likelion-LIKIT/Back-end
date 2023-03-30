@@ -100,6 +100,63 @@ public class HomeworkService {
         return new HomeworkResDto(newHomework);
     }
 
+    @Transactional
+    public void update(Long id, Member member, HomeworkReqDto homeworkReqDto, List<MultipartFile> files) throws Exception {
+        Homework homework = jpaHomeworkRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (homework.getMember() == member) {
+            if (homeworkReqDto != null) {
+                String title = homeworkReqDto.getTitle();
+                String description = homeworkReqDto.getDescription();
+                String location = homeworkReqDto.getLocation();
+                Category category = homeworkReqDto.getCategory();
+                String date = homeworkReqDto.getDate();
+                boolean temp = homeworkReqDto.isTemp();
+                String updateDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+                if (title != null) {
+                    jpaHomeworkRepository.updateTitle(title, id);
+                }
+                if (description != null) {
+                    jpaHomeworkRepository.updateDescription(description, id);
+                }
+                if (location != null) {
+                    jpaHomeworkRepository.updateLocation(location, id);
+                }
+                if (category != null) {
+                    jpaHomeworkRepository.updateCategory(category, id);
+                }
+                if (date != null) {
+                    jpaHomeworkRepository.updateDate(date, id);
+                }
+                if (!temp) {
+                    jpaHomeworkRepository.updateTemp(false, id);
+                }
+                jpaHomeworkRepository.updateUpdateDate(updateDateTime, id);
+            }
+            if (files != null) {
+                List<HomeworkFile> baseHomeworkFileList = jpaHomeworkFileRepository.findAllByHomeworkId(id);
+                List<HomeworkFile> homeworkFileList = homeworkFileHandler.parseFile(files, member.getStudentId());
+                for (HomeworkFile homeworkFile : baseHomeworkFileList) {
+                    jpaHomeworkFileRepository.delete(homeworkFile);
+                }
+                fileId(homeworkFileList, homework);
+            }
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
+    @Transactional
+    public void delete(Long id, Member member) {
+        Homework homework = jpaHomeworkRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (member == homework.getMember()) {
+            jpaHomeworkRepository.delete(homework);
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
+
+
 
 
 }
