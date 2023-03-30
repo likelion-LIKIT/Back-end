@@ -34,5 +34,22 @@ public class LedgerController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @Operation(summary = "ledger 글 조회", description = "Ledger 글 조희")
+    @GetMapping("/ledger")
+    public List<Ledger> viewLedger(@RequestParam(name = "temp", defaultValue = "false", required = false) boolean temp ) {
+        return ledgerService.viewLedger(temp);
+    }
+
+    @Operation(summary = "ledger 글 정보 모두 조회", description = "Ledger 글 조희")
+    @GetMapping("/ledger/all")
+    public List<LedgerResDto> viewAll() {
+        return ledgerService.view();
+    }
+
+    @Operation(summary = "ledger id 글 정보 모두 조회", description = "해당 Ledger 글 조희 + 조회수 증가")
+    @GetMapping("/ledger/{id}")
+    public LedgerResDto viewone(@PathVariable Long id) {
+        return ledgerService.viewOne(id);
+    }
 
 }

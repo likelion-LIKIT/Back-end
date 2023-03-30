@@ -69,6 +69,34 @@ public class LedgerService {
         fileId(ledgerFileList, ledger);
     }
 
+    public List<Ledger> viewLedger(boolean temp) {
+        List<Ledger> ledgers = jpaLedgerRepository.findByTempFalse(Sort.by(Sort.Direction.ASC, "creationDate"));
+        if (temp) {
+            ledgers = jpaLedgerRepository.findByTempTrue(Sort.by(Sort.Direction.ASC, "creationDate"));
+        }
+        return ledgers;
+    }
+
+
+    public List<LedgerResDto> view() {
+        List<Ledger> ledgers = jpaLedgerRepository.findAll(Sort.by(Sort.Direction.ASC, "creationDate"));
+        List<LedgerResDto> ledgerResDto = new ArrayList<>();
+        for (Ledger ledger : ledgers) {
+            ledgerResDto.add(new LedgerResDto(ledger));
+        }
+        return ledgerResDto;
+    }
+
+
+    public LedgerResDto viewOne(Long id) {
+        Ledger ledger = jpaLedgerRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        int visit = ledger.getVisit();
+        jpaLedgerRepository.updateVisit(visit + 1, id);
+        Ledger newLedger = jpaLedgerRepository.getReferenceById(id);
+        return new LedgerResDto(newLedger);
+    }
+
+
 
 
 }
