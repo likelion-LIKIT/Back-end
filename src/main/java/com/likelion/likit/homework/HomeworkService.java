@@ -73,6 +73,33 @@ public class HomeworkService {
         fileId(homeworkFileList, homework);
     }
 
+    public List<Homework> viewHomework(boolean temp) {
+        List<Homework> homework = jpaHomeworkRepository.findByTempFalse(Sort.by(Sort.Direction.ASC, "date"));
+        if (temp) {
+            homework = jpaHomeworkRepository.findByTempTrue(Sort.by(Sort.Direction.ASC, "date"));
+        }
+        return homework;
+    }
+
+
+    public List<HomeworkResDto> view() {
+        List<Homework> homeworks = jpaHomeworkRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+        List<HomeworkResDto> homeworkResDto = new ArrayList<>();
+        for (Homework homework : homeworks) {
+            homeworkResDto.add(new HomeworkResDto(homework));
+        }
+        return homeworkResDto;
+    }
+
+    @Transactional
+    public HomeworkResDto viewOne(Long id) {
+        Homework homework = jpaHomeworkRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        int visit = homework.getVisit();
+        jpaHomeworkRepository.updateVisit(visit + 1, id);
+        Homework newHomework = jpaHomeworkRepository.getReferenceById(id);
+        return new HomeworkResDto(newHomework);
+    }
+
 
 
 }

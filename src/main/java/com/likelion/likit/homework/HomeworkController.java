@@ -34,5 +34,23 @@ public class HomeworkController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @Operation(summary = "homework 글 조회", description = "Homework 글 조희")
+    @GetMapping("/homework")
+    public List<Homework> viewHomework(@RequestParam(name = "temp", defaultValue = "false", required = false) boolean temp ) {
+        return homeworkService.viewHomework(temp);
+    }
+
+    @Operation(summary = "homework 글 정보 모두 조회", description = "Homework 글 조희")
+    @GetMapping("/homework/all")
+    public List<HomeworkResDto> viewAll() {
+        return homeworkService.view();
+    }
+
+    @Operation(summary = "homework id 글 정보 모두 조회", description = "해당 Homework 글 조희 + 조회수 증가")
+    @GetMapping("/homework/{id}")
+    public HomeworkResDto viewone(@PathVariable Long id) {
+        return homeworkService.viewOne(id);
+    }
+
 
 }
