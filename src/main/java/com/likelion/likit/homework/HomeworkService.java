@@ -196,8 +196,44 @@ public class HomeworkService {
     }
 
 
+    @Transactional(readOnly = true)
+    public String findFileByFileId(Long id) {
+        HomeworkFile homeworkFile = jpaHomeworkFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
 
 
+        return uploadPath + homeworkFile.getFilePath();
+    }
 
+    public ResponseEntity<Object> download(Long fileID) throws IOException {
+        HomeworkFile homeworkFile = jpaHomeworkFileRepository.findById(fileID).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
+        String filePath = homeworkFile.getFilePath();
+        try {
+            Resource resource = homeworkFileHandler.download(filePath);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(homeworkFile.getFileName(), StandardCharsets.UTF_8).build());
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
 
+    public String findFileByHomeworkId(Long id, String fileName) throws IOException {
+        HomeworkFile homeworkInfo = null;
+        List<HomeworkFile> homeworkFile = jpaHomeworkFileRepository.findAllByHomeworkId(id);
+        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        for (HomeworkFile homeworkFile1 : homeworkFile) {
+            String a = homeworkFile1.getFileName();
+            String enCompare = URLEncoder.encode(a, StandardCharsets.UTF_8);
+            if (enCompare.equals(enFileName)) {
+                homeworkInfo = homeworkFile1;
+            }
+        }
+        return uploadPath + homeworkInfo.getFilePath();
+    }
+
+    @Transactional
+    public String createImageUrl(List<MultipartFile> imageFile, Member member) throws Exception {
+        ImageFile editorImage = fileService.parseImage(imageFile, false, member.getStudentId(), "homework");
+        return uploadPath + editorImage.getFilePath();
+    }
 }

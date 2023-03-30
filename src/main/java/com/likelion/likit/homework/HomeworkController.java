@@ -104,7 +104,40 @@ public class HomeworkController {
         return new ResponseEntity<>(homeworkService.likeList(id), HttpStatus.OK);
     }
 
+    @CrossOrigin
+    @Operation(summary = "파일 id로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 파일 출력")
+    @GetMapping(
+            value = "homework/file/{id}",
+            produces = {MediaType.ALL_VALUE}
+    )
+    public String getHomeworkFile(@PathVariable Long id) throws IOException {
+        return "file://"+ homeworkService.findFileByFileId(id);
+    }
 
+    @CrossOrigin
+    @Operation(summary = "homework id와 파일 명으로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 homework 파일 url 출력")
+    @GetMapping(
+            value = "homework/{id}/file",
+            produces = {MediaType.ALL_VALUE}
+    )
+    public String getHomeworkFileByName(@PathVariable Long id,
+                                        @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
 
+        return "file://"+ homeworkService.findFileByHomeworkId(id, fileName);
+    }
 
+    @Operation(summary = "homework 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
+    @GetMapping("homework/download/{id}")
+    public ResponseEntity<Object> downloadHomeworkFile(@PathVariable Long id) throws IOException {
+        return homeworkService.download(id);
+    }
+
+    @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + homework 파일 url 출력")
+    @PostMapping(value = "homework/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+                                                 @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        String path = "file://"+ homeworkService.createImageUrl(imageFile, member);
+        return new ResponseEntity<>(path, HttpStatus.OK);
+    }
 }
