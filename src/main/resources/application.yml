@@ -3,8 +3,8 @@
 spring:
   profiles:
     active: dev
-
-
+    
+    
 springdoc:
   version: '@project.version@'
   api-docs:
