@@ -155,6 +155,47 @@ public class HomeworkService {
         }
     }
 
+    @Transactional
+    public String like(Long id, Member member) {
+        String result = "LIKE";
+        Homework homework = jpaHomeworkRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        Optional<HomeworkLikeMembers> liked = jpaHomeworkLikeRepository.findByHomeworkAndMember(homework, member);
+        if (!liked.isPresent()) {
+            HomeworkLikeMembers likeMember = HomeworkLikeMembers.builder()
+                    .homework(homework)
+                    .member(member)
+                    .build();
+            jpaHomeworkLikeRepository.save(likeMember);
+        } else {
+            jpaHomeworkLikeRepository.delete(liked.get());
+            result = "UNLIKE";
+        }
+        Integer count = jpaHomeworkLikeRepository.findByHomeworkId(id).size();
+        jpaHomeworkRepository.updateLikes(count, id);
+        return result;
+    }
+
+    public String checkLike(Long id, Member member) {
+        Homework homework = jpaHomeworkRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        Optional<HomeworkLikeMembers> liked = jpaHomeworkLikeRepository.findByHomeworkAndMember(homework, member);
+        if (liked.isPresent()) {
+            return "LIKED";
+        } else {
+            return "UNLIKED";
+        }
+    }
+
+    public List<String> likeList(Long id) {
+        List<String> likeList = new ArrayList<>();
+        Homework homework = jpaHomeworkRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        List<HomeworkLikeMembers> likeMembers = homework.getHomeworkLikeMembers();
+        for (HomeworkLikeMembers member : likeMembers) {
+            likeList.add(member.getMember().getUsername());
+        }
+        return likeList;
+    }
+
+
 
 
 

@@ -77,5 +77,34 @@ public class HomeworkController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @Operation(summary = "homework 좋아요 등록 및 취소", description =  "해당 글 좋아요 누른 적이 없으면 해당 글에 좋아요 등록 및 좋아요 수 Up &"+ "\n\n" +
+            " 해당 글에 좋아요 누른 적이 있으면 해당 글에 좋아요 취소 및 좋아요 수 Down")
+    @PostMapping("homework/{id}/like")
+    public ResponseEntity<String> likeHomework(@RequestHeader(name = "accessToken") String accessToken,
+                                               @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        String result = homeworkService.like(id, member) + " Success";
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Operation(summary = "homework 좋아요 등록 여부 확인", description = "해당 USER가 좋아요를 눌렀는지 확인 여부"+"\n\n"+
+            "해당 USER가 좋아요 리스트에 존재하면 \"LIKED\"" +"\n\n"+
+            "해당 USER가 좋아요 리스트에 존재하지 않으면 \"UNLIKED\""+"\n\n")
+    @GetMapping("homework/{id}/check")
+    public ResponseEntity<String> checkLiked(@RequestHeader(name = "accessToken") String accessToken,
+                                             @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+
+        return new ResponseEntity<>(homeworkService.checkLike(id, member), HttpStatus.OK);
+    }
+
+    @Operation(summary = "해당 Homework의 좋아요 누른 회원리스트", description = "해당 Homework의 좋아요 누른 회원 이름 반환")
+    @GetMapping("homework/{id}/like")
+    public ResponseEntity<List<String>> homeworkLikeList(@PathVariable Long id) {
+        return new ResponseEntity<>(homeworkService.likeList(id), HttpStatus.OK);
+    }
+
+
+
 
 }
