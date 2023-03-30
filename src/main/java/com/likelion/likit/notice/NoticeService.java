@@ -203,6 +203,16 @@ public class NoticeService {
         }
     }
 
+    public List<String> likeList(Long id) {
+        List<String> likeList = new ArrayList<>();
+        Notice notice = jpaNoticeRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        List<NoticeLikeMembers> likeMembers = notice.getNoticeLikeMembers();
+        for (NoticeLikeMembers member : likeMembers) {
+            likeList.add(member.getMember().getUsername());
+        }
+        return likeList;
+    }
+
     @Transactional(readOnly = true)
     public String findFileByFileId(Long id) {
         NoticeFile noticeFile = jpaNoticeFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));

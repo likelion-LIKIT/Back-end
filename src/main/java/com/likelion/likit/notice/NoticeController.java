@@ -107,6 +107,12 @@ public class NoticeController {
         return new ResponseEntity<>(noticeService.checkLike(id, member), HttpStatus.OK);
     }
 
+    @Operation(summary = "해당 notice의 좋아요 누른 회원리스트", description = "해당 notice의 좋아요 누른 회원 이름 반환")
+    @GetMapping("notice/{id}/like")
+    public ResponseEntity<List<String>> noticeLikeList(@PathVariable Long id) {
+        return new ResponseEntity<>(noticeService.likeList(id), HttpStatus.OK);
+    }
+
     @CrossOrigin
     @Operation(summary = "파일 id로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 파일 출력")
     @GetMapping(
