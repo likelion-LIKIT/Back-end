@@ -96,6 +96,65 @@ public class LedgerService {
         return new LedgerResDto(newLedger);
     }
 
+    @Transactional
+    public void update(Long id, Member member, LedgerReqDto ledgerReqDto, List<MultipartFile> files) throws Exception {
+        Ledger ledger = jpaLedgerRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (ledger.getMember() == member) {
+            if (ledgerReqDto != null) {
+                String month = ledgerReqDto.getMonth();
+                String title = ledgerReqDto.getTitle();
+                String description = ledgerReqDto.getDescription();
+                String expenditure = ledgerReqDto.getExpenditure();
+                String revenue = ledgerReqDto.getRevenue();
+                String carryoverAmount = ledgerReqDto.getCarryoverAmount();
+                boolean temp = ledgerReqDto.isTemp();
+                String updateDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
+                if (month != null) {
+                    jpaLedgerRepository.updateMonth(month, id);
+                }
+                if (title != null) {
+                    jpaLedgerRepository.updateTitle(title, id);
+                }
+                if (description != null) {
+                    jpaLedgerRepository.updateDescription(description, id);
+                }
+                if (expenditure != null) {
+                    jpaLedgerRepository.updateExpenditure(expenditure, id);
+                }
+                if (revenue != null) {
+                    jpaLedgerRepository.updateRevenue(revenue, id);
+                }
+                if (carryoverAmount != null) {
+                    jpaLedgerRepository.updateCarryoverAmount(carryoverAmount, id);
+                }
+                if (!temp) {
+                    jpaLedgerRepository.updateTemp(false, id);
+                }
+                jpaLedgerRepository.updateUpdateDate(updateDateTime, id);
+            }
+            if (files != null) {
+                List<LedgerFile> baseLedgerFileList = jpaLedgerFileRepository.findAllByLedgerId(id);
+                List<LedgerFile> ledgerFileList = ledgerFileHandler.parseFile(files, member.getStudentId());
+                for (LedgerFile ledgerFile : baseLedgerFileList) {
+                    jpaLedgerFileRepository.delete(ledgerFile);
+                }
+                fileId(ledgerFileList, ledger);
+            }
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
+    @Transactional
+    public void delete(Long id, Member member) {
+        Ledger ledger = jpaLedgerRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        if (member == ledger.getMember()) {
+            jpaLedgerRepository.delete(ledger);
+        } else {
+            throw new CustomException(ExceptionEnum.StudentIdNotMatched);
+        }
+    }
+
 
 
 

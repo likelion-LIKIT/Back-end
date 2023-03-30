@@ -52,4 +52,31 @@ public class LedgerController {
         return ledgerService.viewOne(id);
     }
 
+    @Operation(summary = "ledger 수정", description = "성공하면 아래의 내용이 수정됨" + "\n\n" +
+            "title"+ "\n\n" +
+            "description"+ "\n\n" +
+            "location"+ "\n\n" +
+            "category"+ "\n\n" +
+            "date")
+    @PatchMapping("/ledger/{id}")
+    public ResponseEntity<String> updateLedger(@RequestHeader(name = "accessToken") String accessToken,
+                                               @PathVariable Long id,
+                                               @RequestPart(value = "ledgerReqDto", required = false) LedgerReqDto ledgerReqDto,
+                                               @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        ledgerService.update(id, member, ledgerReqDto, files);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
+    @Operation(summary = "ledger 삭제", description = "해당 id 값의 ledger 삭제")
+    @DeleteMapping("ledger/{id}")
+    public ResponseEntity<String> deleteLedger(@RequestHeader(name = "accessToken") String accessToken,
+                                               @PathVariable Long id) {
+        Member member = memberController.findMemberByToken(accessToken);
+        ledgerService.delete(id, member);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
+
+
 }
