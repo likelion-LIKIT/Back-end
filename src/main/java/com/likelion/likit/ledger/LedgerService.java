@@ -155,7 +155,46 @@ public class LedgerService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public String findFileByFileId(Long id) {
+        LedgerFile ledgerFile = jpaLedgerFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
 
+
+        return uploadPath + ledgerFile.getFilePath();
+    }
+
+    public ResponseEntity<Object> download(Long fileID) throws IOException {
+        LedgerFile ledgerFile = jpaLedgerFileRepository.findById(fileID).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
+        String filePath = ledgerFile.getFilePath();
+        try {
+            Resource resource = ledgerFileHandler.download(filePath);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(ledgerFile.getFileName(), StandardCharsets.UTF_8).build());
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
+
+    public String findFileByLedgerId(Long id, String fileName) throws IOException {
+        LedgerFile ledgerInfo = null;
+        List<LedgerFile> ledgerFile = jpaLedgerFileRepository.findAllByLedgerId(id);
+        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        for (LedgerFile ledgerFile1 : ledgerFile) {
+            String a = ledgerFile1.getFileName();
+            String enCompare = URLEncoder.encode(a, StandardCharsets.UTF_8);
+            if (enCompare.equals(enFileName)) {
+                ledgerInfo = ledgerFile1;
+            }
+        }
+        return uploadPath + ledgerInfo.getFilePath();
+    }
+
+    @Transactional
+    public String createImageUrl(List<MultipartFile> imageFile, Member member) throws Exception {
+        ImageFile editorImage = fileService.parseImage(imageFile, false, member.getStudentId(), "ledger");
+        return uploadPath + editorImage.getFilePath();
+    }
 
 
 }

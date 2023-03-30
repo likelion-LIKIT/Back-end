@@ -77,6 +77,42 @@ public class LedgerController {
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
+    @CrossOrigin
+    @Operation(summary = "파일 id로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 파일 출력")
+    @GetMapping(
+            value = "ledger/file/{id}",
+            produces = {MediaType.ALL_VALUE}
+    )
+    public String getLedgerFile(@PathVariable Long id) throws IOException {
+        return "file://"+ ledgerService.findFileByFileId(id);
+    }
+
+    @CrossOrigin
+    @Operation(summary = "ledger id와 파일 명으로 파일 상세 조회", description = "성공하면 File 데이터베이스에 저장되어있는 ledger 파일 url 출력")
+    @GetMapping(
+            value = "ledger/{id}/file",
+            produces = {MediaType.ALL_VALUE}
+    )
+    public String getLedgerFileByName(@PathVariable Long id,
+                                      @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
+
+        return "file://"+ ledgerService.findFileByLedgerId(id, fileName);
+    }
+
+    @Operation(summary = "ledger 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
+    @GetMapping("ledger/download/{id}")
+    public ResponseEntity<Object> downloadLedgerFile(@PathVariable Long id) throws IOException {
+        return ledgerService.download(id);
+    }
+
+    @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + ledger 파일 url 출력")
+    @PostMapping(value = "ledger/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+                                                 @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
+        Member member = memberController.findMemberByToken(accessToken);
+        String path = "file://"+ ledgerService.createImageUrl(imageFile, member);
+        return new ResponseEntity<>(path, HttpStatus.OK);
+    }
 
 
 }
