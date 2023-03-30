@@ -205,6 +205,16 @@ public class DiaryService {
         }
     }
 
+    public List<String> likeList(Long id) {
+        List<String> likeList = new ArrayList<>();
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        List<LikeMembers> likeMembers = diary.getLikeMembers();
+        for (LikeMembers member : likeMembers) {
+            likeList.add(member.getMember().getMemberDetails().getStudentName());
+        }
+        return likeList;
+    }
+
     @Transactional(readOnly = true)
     public String findFileByFileId(Long id) {
         DiaryFile diaryFile = jpaDiaryFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
