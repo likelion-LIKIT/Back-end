@@ -12,6 +12,7 @@ import com.likelion.likit.token.TokenDto;
 import com.likelion.likit.token.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +28,7 @@ public class MemberController{
 
     @Operation(summary = "회원가입", description = "성공하면 memberID 반환")
     @PostMapping("/member/new")
-    public void createMember(@RequestBody MemberReqDto memberReqDto) {
+    public ResponseEntity<String> createMember(@RequestBody MemberReqDto memberReqDto) {
 
         if (jpaMemberRepository.findByStudentId(memberReqDto.getStudentId()).isPresent()) {
             throw new CustomException(ExceptionEnum.STUDENTIDISPRESENT);
@@ -43,6 +44,7 @@ public class MemberController{
         memberService.saveDetail(memberDetail);
         Token token = new Token(member);
         tokenService.join(token);
+        return new ResponseEntity("Success", HttpStatus.OK);
     }
 
     @Operation(summary = "로그인", description = "성공하면 Token 반환")
@@ -68,21 +70,23 @@ public class MemberController{
         }
     }
 
-    @Operation(summary = "회원정보 조회", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
-    @GetMapping("/member")
-    public ResponseEntity<MemberResDto> viewUserInfo(@RequestHeader String accessToken) {
-        Member member = findMemberByToken(accessToken);
-        return ResponseEntity.ok(new MemberResDto(member));
+    @Operation(summary = "회원정보 조회", description = "성공하면 회원 정보 반환")
+    @GetMapping("/member/{studentId}")
+    public ResponseEntity<MemberResDto> viewUserInfo(@PathVariable String studentId) {
+
+        return ResponseEntity.ok(memberService.findMember(studentId));
     }
 
     @Operation(summary = "회원 정보 수정", description = "Header에 accessToken 필수! \n 성공하면 회원 정보 반환")
     @PatchMapping("/member")
-    public ResponseEntity<MemberResDto> updateUserInfo(@RequestHeader String accessToken,
+    public ResponseEntity<String> updateUserInfo(@RequestHeader String accessToken,
                                                        @RequestPart(value = "update", required = false) MemberUpdateReqDto memberUpdateReqDto,
-                                                       @RequestPart(value = "tech", required = false) TechUpdateDto techUpdateDto) {
+                                                       @RequestPart(value = "tech", required = false) TechUpdateDto techUpdateDto,
+                                                       @RequestPart(value = "position", required = false) PositionUpdateDto positionUpdateDto) {
 
         Member member = findMemberByToken(accessToken);
-        return ResponseEntity.ok(memberService.update(member, memberUpdateReqDto, techUpdateDto));
+        memberService.update(member, memberUpdateReqDto, techUpdateDto, positionUpdateDto);
+        return ResponseEntity.ok("Success");
     }
 
     @Operation(summary = "회원 정보 삭제", description = "Header에 accessToken 필수!")

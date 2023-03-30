@@ -1,8 +1,8 @@
-package com.likelion.likit.diary;
+package com.likelion.likit.homework;
 
-import com.likelion.likit.diary.repository.JpaDiaryFileRepository;
+import com.likelion.likit.homework.entity.HomeworkFile;
+import com.likelion.likit.homework.repository.JpaHomeworkFileRepository;
 import com.likelion.likit.file.FileDto;
-import com.likelion.likit.diary.entity.DiaryFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -23,24 +23,24 @@ import java.util.List;
 
 @Component
 
-public class DiaryFileHandler {
+public class HomeworkFileHandler {
 
-    private final JpaDiaryFileRepository jpaDiaryFileRepository;
+    private final JpaHomeworkFileRepository jpaHomeworkFileRepository;
 
     @Value("${part4.upload.path}")
     private String uploadPath;
 
-    public DiaryFileHandler(JpaDiaryFileRepository jpaDiaryFileRepository) {
-        this.jpaDiaryFileRepository = jpaDiaryFileRepository;
+    public HomeworkFileHandler(JpaHomeworkFileRepository jpaHomeworkFileRepository) {
+        this.jpaHomeworkFileRepository = jpaHomeworkFileRepository;
     }
 
-    public List<DiaryFile> parseFile(List<MultipartFile> multipartFiles, boolean isThumbnail, String studentID) throws Exception {
-        List<DiaryFile> diaryFiles = new ArrayList<>();
+    public List<HomeworkFile> parseFile(List<MultipartFile> multipartFiles, String studentID) throws Exception {
+        List<HomeworkFile> homeworkFiles = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(multipartFiles)) {
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-            String path = "file" + java.io.File.separator + studentID + java.io.File.separator + "diary" + java.io.File.separator + currentDate;
+            String path = "file" + java.io.File.separator + studentID + java.io.File.separator + "homework" + java.io.File.separator + currentDate;
             String allPath = uploadPath + path;
             java.io.File file = new java.io.File(allPath);
             file.mkdirs();
@@ -63,18 +63,17 @@ public class DiaryFileHandler {
                         .fileName(originFileName)
                         .filePath(path + java.io.File.separator + saveFileName)
                         .fileSize(multipartFile.getSize())
-                        .isThumbnail(isThumbnail)
+                        .isThumbnail(false)
                         .build();
 
 
-                DiaryFile diaryFile1 = new DiaryFile(
+                HomeworkFile homeworkFile1 = new HomeworkFile(
                         fileDto.getFileName(),
                         fileDto.getFilePath(),
-                        fileDto.getFileSize(),
-                        fileDto.isThumbnail()
+                        fileDto.getFileSize()
                 );
 
-                diaryFiles.add(diaryFile1);
+                homeworkFiles.add(homeworkFile1);
 
                 String saveName = uploadPath + File.separator + path + File.separator + saveFileName;
 
@@ -85,7 +84,7 @@ public class DiaryFileHandler {
                 file.setReadable(true);
             }
         }
-        return diaryFiles;
+        return homeworkFiles;
     }
 
 

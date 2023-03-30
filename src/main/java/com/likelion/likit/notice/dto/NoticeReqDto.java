@@ -1,8 +1,8 @@
-package com.likelion.likit.diary.dto;
+package com.likelion.likit.notice.dto;
 
-import com.likelion.likit.diary.entity.Category;
-import com.likelion.likit.diary.entity.Diary;
-import com.likelion.likit.diary.entity.DiaryFile;
+import com.likelion.likit.notice.entity.Category;
+import com.likelion.likit.notice.entity.Notice;
+import com.likelion.likit.notice.entity.NoticeFile;
 import com.likelion.likit.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class DiaryReqDto {
+public class NoticeReqDto {
     private String title;
     private String description;
     private String location;
@@ -19,17 +19,17 @@ public class DiaryReqDto {
     private boolean temp;
 
     @Builder
-    public DiaryReqDto(Diary diary) {
-        this.title = diary.getTitle();
-        this.description = diary.getDescription();
-        this.location = diary.getLocation();
-        this.category = diary.getCategory();
-        this.date = diary.getDate();
-        this.temp = diary.isTemp();
+    public NoticeReqDto(Notice notice) {
+        this.title = notice.getTitle();
+        this.description = notice.getDescription();
+        this.location = notice.getLocation();
+        this.category = notice.getCategory();
+        this.date = notice.getDate();
+        this.temp = notice.isTemp();
     }
 
-    public Diary toEntity(Member member, DiaryFile thumbnail) {
-        return Diary.builder()
+    public Notice toEntity(Member member, NoticeFile thumbnail) {
+        return Notice.builder()
                 .member(member)
                 .thumbnail(thumbnail)
                 .title(title)

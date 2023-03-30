@@ -1,4 +1,4 @@
-package com.likelion.likit.diary.entity;
+package com.likelion.likit.homework.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.likelion.likit.member.entity.Member;
@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Diary {
+public class Homework {
 
     @PrePersist
     public void PrePersist() {
@@ -41,19 +41,15 @@ public class Diary {
     private Member member;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "diary", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
-    private List<DiaryFile> diaryFiles = new ArrayList<>();
-
-    @JsonIgnore
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
-    private DiaryFile thumbnail;
+    @OneToMany(mappedBy = "homework", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
+    private List<HomeworkFile> homeworkFiles = new ArrayList<>();
 
     @Enumerated(value = EnumType.STRING)
     private Category category;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "diary", fetch = FetchType.LAZY)
-    private List<LikeMembers> likeMembers = new ArrayList<>();
+    @OneToMany(mappedBy = "homework", fetch = FetchType.LAZY)
+    private List<HomeworkLikeMembers> homeworkLikeMembers = new ArrayList<>();
 
     private Integer likes;
 
@@ -72,16 +68,15 @@ public class Diary {
     private String updateDate;
 
     @Builder
-    public Diary(String title, String description, String location, Member member, List<DiaryFile> diaryFiles, DiaryFile thumbnail, Category category,
-                 List<LikeMembers> likeMembers, Integer likes, int visit, String date, boolean temp) {
+    public Homework(String title, String description, String location, Member member, List<HomeworkFile> homeworkFiles, Category category,
+                    List<HomeworkLikeMembers> homeworkLikeMembers, Integer likes, int visit, String date, boolean temp) {
         this.title = title;
         this.description = description;
         this.location = location;
         this.member = member;
-        this.diaryFiles = diaryFiles;
-        this.thumbnail = thumbnail;
+        this.homeworkFiles = homeworkFiles;
         this.category = category;
-        this.likeMembers = likeMembers;
+        this.homeworkLikeMembers = homeworkLikeMembers;
         this.likes = likes;
         this.visit = visit;
         this.date = String.format(date, DateTimeFormatter.ofPattern("yyy.MM.dd"));

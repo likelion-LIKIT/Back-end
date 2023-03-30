@@ -4,12 +4,10 @@ import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.member.dto.MemberUpdateReqDto;
 import com.likelion.likit.member.dto.MemberResDto;
+import com.likelion.likit.member.dto.PositionUpdateDto;
 import com.likelion.likit.member.dto.TechUpdateDto;
 import com.likelion.likit.member.entity.*;
-import com.likelion.likit.member.repository.JpaMemberDetailRepository;
-import com.likelion.likit.member.repository.JpaMemberRepository;
-import com.likelion.likit.member.repository.JpaMemberTechStackRepository;
-import com.likelion.likit.member.repository.JpaTechStackRepository;
+import com.likelion.likit.member.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,13 +29,15 @@ public class MemberService  {
     private final JpaMemberDetailRepository jpaMemberDetailRepository;
     private final JpaTechStackRepository jpaTechStackRepository;
     private final JpaMemberTechStackRepository jpaMemberTechStackRepository;
+    private final JpaPositionRepository jpaPositionRepository;
 
-    @Transactional
+
     public Member findByStudentId(String studentId) {
         Member member = jpaMemberRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));
         return member;
     }
+
     @Transactional
     public void join(Member member) {
         jpaMemberRepository.save(member);
@@ -49,6 +48,10 @@ public class MemberService  {
         jpaMemberDetailRepository.save(memberDetail);
     }
 
+    private MemberResDto findMemberInfo(Member member) {
+        return new MemberResDto(member);
+    }
+
 
     public UserDetails loadUserByUsername(String studentId) throws UsernameNotFoundException {
         return jpaMemberRepository.findByStudentId(studentId)
@@ -56,7 +59,7 @@ public class MemberService  {
     }
 
     @Transactional
-    public MemberResDto update(Member member, MemberUpdateReqDto memberUpdateReqDto, TechUpdateDto techUpdateDto) {
+    public void update(Member member, MemberUpdateReqDto memberUpdateReqDto, TechUpdateDto techUpdateDto, PositionUpdateDto positionUpdateDto) {
 
         String updateStudentName = memberUpdateReqDto.getStudentName();
         String updatePhoneNumber = memberUpdateReqDto.getPhoneNumber();
@@ -67,19 +70,18 @@ public class MemberService  {
         String updateLikelionEmail = memberUpdateReqDto.getLikelionEmail();
         String updateEmail = memberUpdateReqDto.getEmail();
         Integer updateTerm = memberUpdateReqDto.getTerm();
-        Position updatePosition = memberUpdateReqDto.getPosition();
         String updateBirth = memberUpdateReqDto.getBirth();
         String updateGithub = memberUpdateReqDto.getGithub();
         String updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
         Long memberId = member.getId();
         MemberDetail memberDetails = jpaMemberDetailRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));;
+                .orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));
         Long id = memberDetails.getId();
 
         List<String> tech = techUpdateDto.getTech();
         if (tech != null) {
             List<MemberTechStack> memberTechStacks = jpaMemberTechStackRepository.findAllByMemberDetail(memberDetails);
-            if (!memberTechStacks.isEmpty()){
+            if (!memberTechStacks.isEmpty()) {
                 List<Long> ids = new ArrayList<>();
                 for (MemberTechStack memberTechStack : memberTechStacks) {
                     ids.add(memberTechStack.getId());
@@ -87,7 +89,7 @@ public class MemberService  {
                 jpaMemberTechStackRepository.deleteAllByIdInQuery(ids);
             }
             List<MemberTechStack> newMemberTechStacks = new ArrayList<>();
-            for(String ts : tech) {
+            for (String ts : tech) {
                 TechStack techStack = jpaTechStackRepository.findByTechStack(ts);
                 MemberTechStack memberTechStack
                         = MemberTechStack.builder()
@@ -97,6 +99,29 @@ public class MemberService  {
                 newMemberTechStacks.add(memberTechStack);
             }
             jpaMemberTechStackRepository.saveAllAndFlush(newMemberTechStacks);
+        }
+
+        List<Category> positions = positionUpdateDto.getPosition();
+        if (positions != null) {
+            List<Position> memberPositions = jpaPositionRepository.findAllByMemberDetail(memberDetails);
+            if (!memberPositions.isEmpty()) {
+                List<Long> ids = new ArrayList<>();
+                for (Position memberPosition : memberPositions) {
+                    ids.add(memberPosition.getId());
+                }
+                jpaPositionRepository.deleteAllByIdInQuery(ids);
+            }
+            List<Position> newMemberPositions = new ArrayList<>();
+            for (Category category : positions) {
+                Position memberPosition
+                        = Position.builder()
+                        .memberDetail(memberDetails)
+                        .category(category)
+                        .build();
+                newMemberPositions.add(memberPosition);
+            }
+
+            jpaPositionRepository.saveAllAndFlush(newMemberPositions);
         }
 
         if (updateStudentName != null) {
@@ -126,9 +151,6 @@ public class MemberService  {
         if (updateTerm != null) {
             jpaMemberDetailRepository.updateTerm(updateTerm, id);
         }
-        if (updatePosition != null) {
-            jpaMemberDetailRepository.updatePosition(updatePosition, id);
-        }
         if (updateBirth != null) {
             jpaMemberDetailRepository.updateBirth(updateBirth, id);
         }
@@ -136,15 +158,16 @@ public class MemberService  {
             jpaMemberDetailRepository.updateGithub(updateGithub, id);
         }
         jpaMemberDetailRepository.updateDate(updateDate, id);
-        MemberResDto memberResDto = new MemberResDto(member);
-
-        return memberResDto;
     }
-
 
 
     @Transactional
     public void delete(Member member) {
         jpaMemberRepository.delete(member);
+    }
+
+    public MemberResDto findMember(String studentId) {
+        Member member = jpaMemberRepository.findByStudentId(studentId).orElseThrow(() -> new CustomException(ExceptionEnum.StudentIdNotMatched));
+        return new MemberResDto(member);
     }
 }

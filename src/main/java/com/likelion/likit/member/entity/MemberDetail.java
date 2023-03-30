@@ -1,6 +1,5 @@
 package com.likelion.likit.member.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +8,9 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -43,7 +44,7 @@ public class MemberDetail {
     private Track track;
 
     @OneToMany(mappedBy = "memberDetail", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    private List<MemberTechStack> memberTechStacks = new ArrayList<>();
+    private Set<MemberTechStack> memberTechStacks = new HashSet<>();
 
     @Column(name = "likelion_email", unique = true)
     private String likelionEmail;
@@ -52,15 +53,18 @@ public class MemberDetail {
     private String email;
 
     private Integer term;
-    private Position position;
+
+    @OneToMany(mappedBy = "memberDetail", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    private Set<Position> positions = new HashSet<>();
+
     private String birth;
     private String github;
     private String updateDate;
 
     @Builder
     public MemberDetail(Member member, String studentName, String phoneNumber, String description,
-                        Grade grade, Major major, Track track, List<MemberTechStack> memberTechStacks, String likelionEmail,
-                        String email, Integer term, Position position, String birth, String github) {
+                        Grade grade, Major major, Track track, Set<MemberTechStack> memberTechStacks, String likelionEmail,
+                        String email, Integer term, Set<Position> positions, String birth, String github) {
         this.member = member;
         this.studentName = studentName;
         this.phoneNumber = phoneNumber;
@@ -72,7 +76,7 @@ public class MemberDetail {
         this.likelionEmail = likelionEmail;
         this.email = email;
         this.term = term;
-        this.position = position;
+        this.positions = positions;
         this.birth = birth;
         this.github = github;
         this.updateDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));

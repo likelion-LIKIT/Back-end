@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -30,7 +31,7 @@ public class MemberResDto {
         private String likelionEmail;
         private String email;
         private Integer term;
-        private Position position;
+        private List<Category> position;
         private String birth;
         private String github;
 
@@ -45,7 +46,7 @@ public class MemberResDto {
             this.likelionEmail = memberDetail.getLikelionEmail();
             this.email = memberDetail.getEmail();
             this.term = memberDetail.getTerm();
-            this.position = memberDetail.getPosition();
+            this.position = PositionList(memberDetail.getPositions());
             this.birth = memberDetail.getBirth();
             this.github = memberDetail.getGithub();
         }
@@ -55,7 +56,7 @@ public class MemberResDto {
     private class MemberTechStackDto {
         private List<String> techStack;
 
-        public MemberTechStackDto(List<MemberTechStack> memberTechStack) {
+        public MemberTechStackDto(Set<MemberTechStack> memberTechStack) {
             List<String> TechStackInfo = new ArrayList<>();
             for (MemberTechStack memberTechStack1 : memberTechStack) {
                 TechStackDto techStackDto = new TechStackDto(memberTechStack1.getTechStack());
@@ -65,7 +66,7 @@ public class MemberResDto {
 
         }
 
-        }
+    }
 
     @Getter
     private class TechStackDto {
@@ -75,6 +76,17 @@ public class MemberResDto {
             this.techStackName = techStack.getTechStack();
         }
     }
+
+    public List<Category> PositionList(Set<Position> positions) {
+            List<Category> positionInfo = new ArrayList<>();
+            for (Position position : positions) {
+                positionInfo.add(position.getCategory());
+            }
+            return positionInfo;
+
+    }
+
+
 }
 
 

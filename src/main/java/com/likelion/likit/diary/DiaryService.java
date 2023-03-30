@@ -12,15 +12,25 @@ import com.likelion.likit.exception.CustomException;
 import com.likelion.likit.exception.ExceptionEnum;
 import com.likelion.likit.diary.entity.DiaryFile;
 import com.likelion.likit.diary.repository.JpaDiaryFileRepository;
-import com.likelion.likit.file.FileDto;
+import com.likelion.likit.file.FileService;
+import com.likelion.likit.file.entity.ImageFile;
 import com.likelion.likit.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,7 +43,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DiaryService {
 
+    @Value("${part4.upload.path}")
+    private String uploadPath;
+
     private final DiaryFileHandler diaryFileHandler;
+    private final FileService fileService;
     private final JpaDiaryRepository jpaDiaryRepository;
     private final JpaDiaryFileRepository jpaDiaryFileRepository;
     private final JpaDiaryLikeRepository jpaDiaryLikeRepository;
@@ -54,8 +68,8 @@ public class DiaryService {
 
     @Transactional
     public void create(Member member, DiaryReqDto diaryReqDto, List<MultipartFile> thumbnail, List<MultipartFile> files) throws Exception {
-        List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false);
-        List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true);
+        List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false, member.getStudentId());
+        List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true, member.getStudentId());
         Long id = saveDiary(member, thumbnailDiaryFile.get(0), diaryReqDto);
         Diary diary = jpaDiaryRepository.getReferenceById(id);
         fileId(diaryFileList, diary);
@@ -67,11 +81,15 @@ public class DiaryService {
         return jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
     }
 
-    public List<DiaryThumbnailDto> viewDiaryWithThumbnail() {
-        List<Diary> diaries = jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+    public List<DiaryThumbnailDto> viewDiaryWithThumbnail(boolean temp) {
+        List<Diary> diaries = jpaDiaryRepository.findByTempFalse(Sort.by(Sort.Direction.ASC, "date"));
+        if (temp) {
+            diaries = jpaDiaryRepository.findByTempTrue(Sort.by(Sort.Direction.ASC, "date"));
+        }
+
         List<DiaryThumbnailDto> diaryThumbnailDtos = new ArrayList<>();
         for (Diary diary : diaries) {
-            System.out.println(diary.getThumbnail().getId());
+//            System.out.println(diary.getThumbnail().getId());
             diaryThumbnailDtos.add(new DiaryThumbnailDto(diary));
         }
         return diaryThumbnailDtos;
@@ -81,7 +99,7 @@ public class DiaryService {
         List<Diary> diaries = jpaDiaryRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
         List<DiaryResDto> diaryResDto = new ArrayList<>();
         for (Diary diary : diaries) {
-            System.out.println(diary.getThumbnail().getId());
+//            System.out.println(diary.getThumbnail().getId());
             diaryResDto.add(new DiaryResDto(diary));
         }
         return diaryResDto;
@@ -91,7 +109,7 @@ public class DiaryService {
     public DiaryResDto viewOne(Long id) {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         int visit = diary.getVisit();
-        jpaDiaryRepository.updateVisit(visit+1, id);
+        jpaDiaryRepository.updateVisit(visit + 1, id);
         Diary newDiary = jpaDiaryRepository.getReferenceById(id);
         return new DiaryResDto(newDiary);
     }
@@ -106,6 +124,7 @@ public class DiaryService {
                 String location = diaryReqDto.getLocation();
                 Category category = diaryReqDto.getCategory();
                 String date = diaryReqDto.getDate();
+                boolean temp = diaryReqDto.isTemp();
                 String updateDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
                 if (title != null) {
                     jpaDiaryRepository.updateTitle(title, id);
@@ -122,17 +141,20 @@ public class DiaryService {
                 if (date != null) {
                     jpaDiaryRepository.updateDate(date, id);
                 }
+                if (!temp) {
+                    jpaDiaryRepository.updateTemp(false, id);
+                }
                 jpaDiaryRepository.updateUpdateDate(updateDateTime, id);
             }
             if (thumbnail != null) {
                 DiaryFile baseThumbnail = jpaDiaryFileRepository.findByDiaryIdAndIsThumbnail(id, true);
                 jpaDiaryFileRepository.delete(baseThumbnail);
-                List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true);
+                List<DiaryFile> thumbnailDiaryFile = diaryFileHandler.parseFile(thumbnail, true, member.getStudentId());
                 fileId(thumbnailDiaryFile, diary);
             }
             if (files != null) {
                 List<DiaryFile> baseDiaryFileList = jpaDiaryFileRepository.findAllByDiaryIdAndIsThumbnail(id, false);
-                List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false);
+                List<DiaryFile> diaryFileList = diaryFileHandler.parseFile(files, false, member.getStudentId());
                 for (DiaryFile diaryFile : baseDiaryFileList) {
                     jpaDiaryFileRepository.delete(diaryFile);
                 }
@@ -158,7 +180,7 @@ public class DiaryService {
         String result = "LIKE";
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         Optional<LikeMembers> liked = jpaDiaryLikeRepository.findByDiaryAndMember(diary, member);
-        if (!liked.isPresent()){
+        if (!liked.isPresent()) {
             LikeMembers likeMember = LikeMembers.builder()
                     .diary(diary)
                     .member(member)
@@ -176,24 +198,76 @@ public class DiaryService {
     public String checkLike(Long id, Member member) {
         Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
         Optional<LikeMembers> liked = jpaDiaryLikeRepository.findByDiaryAndMember(diary, member);
-        if (liked.isPresent()){
+        if (liked.isPresent()) {
             return "LIKED";
         } else {
             return "UNLIKED";
         }
     }
 
+    public List<String> likeList(Long id) {
+        List<String> likeList = new ArrayList<>();
+        Diary diary = jpaDiaryRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.NOTEXIST));
+        List<LikeMembers> likeMembers = diary.getLikeMembers();
+        for (LikeMembers member : likeMembers) {
+            likeList.add(member.getMember().getMemberDetails().getStudentName());
+        }
+        return likeList;
+    }
+
     @Transactional(readOnly = true)
-    public FileDto findDiaryByFileId(Long id) {
+    public String findFileByFileId(Long id) {
         DiaryFile diaryFile = jpaDiaryFileRepository.findById(id).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
 
-        FileDto fileDto = FileDto.builder()
-                .fileName(diaryFile.getFileName())
-                .filePath(diaryFile.getFilePath())
-                .fileSize(diaryFile.getFileSize())
-                .isThumbnail(diaryFile.isThumbnail())
-                .build();
+//        FileDto fileDto = FileDto.builder()
+//                .fileName(diaryFile.getFileName())
+//                .filePath(diaryFile.getFilePath())
+//                .fileSize(diaryFile.getFileSize())
+//                .isThumbnail(diaryFile.isThumbnail())
+//                .build();
 
-        return fileDto;
+        return uploadPath + diaryFile.getFilePath();
+    }
+
+    public ResponseEntity<Object> download(Long fileID) throws IOException {
+        DiaryFile diaryFile = jpaDiaryFileRepository.findById(fileID).orElseThrow(() -> new CustomException(ExceptionEnum.FILENOTEXIST));
+        String filePath = diaryFile.getFilePath();
+        try {
+            Resource resource = diaryFileHandler.download(filePath);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(diaryFile.getFileName(), StandardCharsets.UTF_8).build());
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
+
+    public String findFileByDiaryId(Long id, String fileName) throws IOException {
+        DiaryFile diaryInfo = null;
+        List<DiaryFile> diaryFile = jpaDiaryFileRepository.findAllByDiaryId(id);
+//        System.out.println(diaryFile);
+        String enFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        for (DiaryFile diaryFile1 : diaryFile) {
+            String a = diaryFile1.getFileName();
+            String enCompare = URLEncoder.encode(a, StandardCharsets.UTF_8);
+//            System.out.println(enCompare + " " + enFileName);
+            if (enCompare.equals(enFileName)) {
+                diaryInfo = diaryFile1;
+            }
+        }
+//        FileDto fileDto = FileDto.builder()
+//                .fileName(diaryInfo.getFileName())
+//                .filePath(diaryInfo.getFilePath())
+//                .fileSize(diaryInfo.getFileSize())
+//                .isThumbnail(diaryInfo.isThumbnail())
+//                .build();
+
+        return uploadPath + diaryInfo.getFilePath();
+    }
+
+    @Transactional
+    public String createImageUrl(List<MultipartFile> imageFile, Member member) throws Exception {
+        ImageFile editorImage = fileService.parseImage(imageFile, false, member.getStudentId(), "diary");
+        return uploadPath + editorImage.getFilePath();
     }
 }
