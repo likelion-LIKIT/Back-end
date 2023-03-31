@@ -53,7 +53,8 @@ public class NoticeFileHandler {
                 if (ObjectUtils.isEmpty(contentType)) {
                     break;
                 } else {
-                    fileExtension = "." + (originFileName != null ? originFileName.split("\\.") : new String[0])[1];
+                    String[] fileNameArr = originFileName != null ? originFileName.split("\\.") : new String[0];
+                    fileExtension = fileNameArr.length > 1 ? "." + fileNameArr[1] : "";
                 }
 
                 String saveFileName = System.nanoTime() + fileExtension;
