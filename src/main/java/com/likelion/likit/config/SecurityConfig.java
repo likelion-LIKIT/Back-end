@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 // 세션 기반의 인증을 사용하지 않기 때문에 csrf 공격은 무효하다.
                 .cors()
+                .configurationSource(corsConfigurationSource())
                 .and()
                 .formLogin()
                 .disable()
@@ -75,7 +76,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 그래서 hasAuthority 로 바꿈..
                 // 그 외 나머지 요청은 모두 인증된 회원만 접근 가능
 
-                .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())
                 // 접근 권한 없을 때를 처리할 핸들러
@@ -98,7 +98,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:3000", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type", "x-auth-token"));
         configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
