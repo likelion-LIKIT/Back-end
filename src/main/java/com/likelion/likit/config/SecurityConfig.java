@@ -68,6 +68,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/member/new", "/member/login","/member/reissue","/exception/**").permitAll()
                 // 로그인이나 회원가입은 다 허용
                 .antMatchers(HttpMethod.GET,  "/swagger-ui.html/**","/helloworld/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "api/**").permitAll()
                 // 위 경로로 시작하는 get 요청 리소스는 누구나 접근 가능
 //                .anyRequest().hasAnyAuthority(Auth.USER.getRole(),Auth.ADMIN.getRole())
                 // 와우 hasRole 은 string 으로 ROLE_ 이 앞에 알아서 붙음;;
