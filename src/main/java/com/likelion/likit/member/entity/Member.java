@@ -1,5 +1,6 @@
 package com.likelion.likit.member.entity;
 
+import com.likelion.likit.activity.entity.Activity;
 import com.likelion.likit.token.Token;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,6 +43,8 @@ public class Member implements UserDetails{
     @OneToOne(mappedBy = "member", cascade = CascadeType.REMOVE)
     private Token token;
 
+    @OneToMany(mappedBy = "member" , cascade = CascadeType.REMOVE)
+    private List<Activity> activities = new ArrayList<>();
 
     @Builder
     public Member(String studentId, String password,

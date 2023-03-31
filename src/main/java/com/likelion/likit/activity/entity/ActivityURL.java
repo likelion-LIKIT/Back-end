@@ -24,7 +24,8 @@ public class ActivityURL {
     private String activityURL;
 
     @Builder
-    public ActivityURL(String activityURL) {
+    public ActivityURL(Activity activity, String activityURL) {
+        this.activity = activity;
         this.activityURL = activityURL;
     }
 }

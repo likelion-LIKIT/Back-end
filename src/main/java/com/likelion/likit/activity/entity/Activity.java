@@ -1,6 +1,8 @@
 package com.likelion.likit.activity.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.likelion.likit.member.entity.Member;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -47,6 +49,10 @@ public class Activity {
     private String github;
 
     @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "member_id")
+    private Member member;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "activity", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} , orphanRemoval = true)
     private List<ActivityURL> activityURLs = new ArrayList<>();
 
@@ -62,12 +68,14 @@ public class Activity {
     @OneToMany(mappedBy = "activity", fetch = FetchType.LAZY)
     private List<ProjectJoin> projectJoins = new ArrayList<>();
 
+    @Builder
     public Activity(ActivityFile icon, String title, String description, String startDate, String endDate,
                     String achieve, String github, List<ActivityURL> activityURLs, ActivityFile serviceThumbnail,
-                    List<ActivityFile> activityFiles, List<ProjectJoin> projectJoins) {
+                    List<ActivityFile> activityFiles, List<ProjectJoin> projectJoins, Member member) {
         this.icon = icon;
         this.title = title;
         this.description = description;
+        this.member = member;
         this.startDate = String.format(startDate, DateTimeFormatter.ofPattern("yyy.MM.dd"));
         this.endDate = String.format(endDate, DateTimeFormatter.ofPattern("yyy.MM.dd"));
         this.creationDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyy.MM.dd HH:mm"));
