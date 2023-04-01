@@ -7,13 +7,16 @@ import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -83,8 +86,13 @@ public class LedgerController {
             value = "ledger/file/{id}",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getLedgerFile(@PathVariable Long id) throws IOException {
-        return "file://"+ ledgerService.findFileByFileId(id);
+    public ResponseEntity<byte[]> getLedgerFile(@PathVariable Long id) throws IOException {
+        String path = ledgerService.findFileByFileId(id);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -93,10 +101,15 @@ public class LedgerController {
             value = "ledger/{id}/file",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getLedgerFileByName(@PathVariable Long id,
+    public ResponseEntity<byte[]> getLedgerFileByName(@PathVariable Long id,
                                       @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
 
-        return "file://"+ ledgerService.findFileByLedgerId(id, fileName);
+        String path = ledgerService.findFileByLedgerId(id, fileName);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @Operation(summary = "ledger 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
@@ -107,11 +120,15 @@ public class LedgerController {
 
     @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + ledger 파일 url 출력")
     @PostMapping(value = "ledger/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
-    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+    public ResponseEntity<byte[]> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
                                                  @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
-        String path = "file://"+ ledgerService.createImageUrl(imageFile, member);
-        return new ResponseEntity<>(path, HttpStatus.OK);
+        String path = ledgerService.createImageUrl(imageFile, member);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
 

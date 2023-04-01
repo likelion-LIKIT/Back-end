@@ -8,13 +8,16 @@ import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -120,7 +123,7 @@ public class DiaryController {
             value = "diary/file/{id}",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getDiaryFile(@PathVariable Long id) throws IOException {
+    public ResponseEntity<byte[]> getDiaryFile(@PathVariable Long id) throws IOException {
 //        FileDto fileDto = diaryService.findFileByFileId(id);
 //        String absolutePath
 //                = new File("").getAbsolutePath() + File.separator + File.separator;
@@ -131,7 +134,12 @@ public class DiaryController {
 //        imageStream.close();
 //
 //        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
-        return "file://"+diaryService.findFileByFileId(id);
+        String path =  diaryService.findFileByFileId(id);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -140,7 +148,7 @@ public class DiaryController {
             value = "diary/{id}/file",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getDiaryFileByName(@PathVariable Long id,
+    public ResponseEntity<byte[]> getDiaryFileByName(@PathVariable Long id,
                                @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
 
 //        Path path = Paths.get(diaryService.findDiaryByDiaryId(id, fileName));
@@ -148,7 +156,12 @@ public class DiaryController {
 //        RedirectView redirectView = new RedirectView();
 //        redirectView.setUrl("file://"+diaryService.findDiaryByDiaryId(id, fileName));
 //        System.out.println(redirectView);
-        return "file://"+diaryService.findFileByDiaryId(id, fileName);
+        String path = diaryService.findFileByDiaryId(id, fileName);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @Operation(summary = "diary 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
@@ -159,10 +172,14 @@ public class DiaryController {
 
     @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + diary 파일 url 출력")
     @PostMapping(value = "diary/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
-    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+    public ResponseEntity<byte[]> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
                               @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
-        String path = "file://"+diaryService.createImageUrl(imageFile, member);
-        return new ResponseEntity<>(path, HttpStatus.OK);
+        String path = diaryService.createImageUrl(imageFile, member);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 }
