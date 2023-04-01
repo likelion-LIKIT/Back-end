@@ -8,14 +8,18 @@ import com.likelion.likit.member.MemberController;
 import com.likelion.likit.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -68,10 +72,10 @@ public class NoticeController {
             "date")
     @PatchMapping("/notice/{id}")
     public ResponseEntity<String> updateNotice(@RequestHeader(name = "accessToken") String accessToken,
-                                              @PathVariable Long id,
-                                              @RequestPart(value = "noticeReqDto", required = false) NoticeReqDto noticeReqDto,
-                                              @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
-                                              @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
+                                               @PathVariable Long id,
+                                               @RequestPart(value = "noticeReqDto", required = false) NoticeReqDto noticeReqDto,
+                                               @RequestPart(value = "thumbnail", required = false)List<MultipartFile> thumbnail,
+                                               @RequestPart(value = "file", required = false)List<MultipartFile> files) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
         noticeService.update(id, member, noticeReqDto, thumbnail, files);
         return new ResponseEntity<>("Success", HttpStatus.OK);
@@ -80,7 +84,7 @@ public class NoticeController {
     @Operation(summary = "notice 삭제", description = "해당 id 값의 notice 삭제")
     @DeleteMapping("notice/{id}")
     public ResponseEntity<String> deleteNotice(@RequestHeader(name = "accessToken") String accessToken,
-                                              @PathVariable Long id) {
+                                               @PathVariable Long id) {
         Member member = memberController.findMemberByToken(accessToken);
         noticeService.delete(id, member);
         return new ResponseEntity<>("Success", HttpStatus.OK);
@@ -90,7 +94,7 @@ public class NoticeController {
             " 해당 글에 좋아요 누른 적이 있으면 해당 글에 좋아요 취소 및 좋아요 수 Down")
     @PostMapping("notice/{id}/like")
     public ResponseEntity<String> likeNotice(@RequestHeader(name = "accessToken") String accessToken,
-                                            @PathVariable Long id) {
+                                             @PathVariable Long id) {
         Member member = memberController.findMemberByToken(accessToken);
         String result = noticeService.like(id, member) + " Success";
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -119,8 +123,13 @@ public class NoticeController {
             value = "notice/file/{id}",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getNoticeFile(@PathVariable Long id) throws IOException {
-        return "file://"+ noticeService.findFileByFileId(id);
+    public ResponseEntity<byte[]> getNoticeFile(@PathVariable Long id) throws IOException {
+        String path = noticeService.findFileByFileId(id);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -129,10 +138,15 @@ public class NoticeController {
             value = "notice/{id}/file",
             produces = {MediaType.ALL_VALUE}
     )
-    public String getNoticeFileByName(@PathVariable Long id,
-                               @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
+    public ResponseEntity<byte[]> getNoticeFileByName(@PathVariable Long id,
+                                                      @RequestParam(name = "name") String fileName) throws IOException, URISyntaxException {
 
-        return "file://"+ noticeService.findFileByNoticeId(id, fileName);
+        String path = noticeService.findFileByNoticeId(id, fileName);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @Operation(summary = "notice 파일 다운로드", description = "성공하면 로컬에 자동 다운로드")
@@ -143,10 +157,14 @@ public class NoticeController {
 
     @Operation(summary = "에디터 이미지 저장", description = "성공하면 File 데이터베이스에 저장 + notice 파일 url 출력")
     @PostMapping(value = "notice/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
-    public ResponseEntity<Object> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
-                              @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
+    public ResponseEntity<byte[]> createImageUrl(@RequestHeader(name = "accessToken") String accessToken,
+                                                 @RequestPart(value = "file", required = false)List<MultipartFile> imageFile) throws Exception {
         Member member = memberController.findMemberByToken(accessToken);
-        String path = "file://"+ noticeService.createImageUrl(imageFile, member);
-        return new ResponseEntity<>(path, HttpStatus.OK);
+        String path = noticeService.createImageUrl(imageFile, member);
+        InputStream imageStream = new FileInputStream(path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 }
